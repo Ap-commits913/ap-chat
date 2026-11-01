@@ -43,27 +43,27 @@
                 </div>
 
                 <div class="flex bg-zinc-800 p-1 rounded-xl text-xs font-bold">
-                    <button id="tab-login" onclick="setAuthTab('login')" class="flex-1 py-2 rounded-lg bg-zinc-700 text-white">Login</button>
-                    <button id="tab-register" onclick="setAuthTab('register')" class="flex-1 py-2 rounded-lg text-zinc-400">Register</button>
+                    <button type="button" id="tab-login" onclick="setAuthTab('login')" class="flex-1 py-2 rounded-lg bg-zinc-700 text-white">Login</button>
+                    <button type="button" id="tab-register" onclick="setAuthTab('register')" class="flex-1 py-2 rounded-lg text-zinc-400">Register</button>
                 </div>
 
-                <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-3 text-xs">
+                <div id="auth-form" class="space-y-3 text-xs">
                     <div id="group-name" class="hidden">
                         <label class="block text-zinc-400 font-bold mb-1">FULL NAME</label>
                         <input type="text" id="auth-name" placeholder="আব্দুল্লাহ বিন ইলিয়াস" class="w-full bg-zinc-800 border border-zinc-700 p-3 rounded-xl outline-none focus:border-blue-500 text-white">
                     </div>
                     <div>
                         <label class="block text-zinc-400 font-bold mb-1">EMAIL ADDRESS</label>
-                        <input type="email" id="auth-email" required placeholder="user@example.com" class="w-full bg-zinc-800 border border-zinc-700 p-3 rounded-xl outline-none focus:border-blue-500 text-white">
+                        <input type="email" id="auth-email" placeholder="user@example.com" class="w-full bg-zinc-800 border border-zinc-700 p-3 rounded-xl outline-none focus:border-blue-500 text-white">
                     </div>
                     <div>
                         <label class="block text-zinc-400 font-bold mb-1">PASSWORD</label>
-                        <input type="password" id="auth-pass" required placeholder="••••••••" class="w-full bg-zinc-800 border border-zinc-700 p-3 rounded-xl outline-none focus:border-blue-500 text-white">
+                        <input type="password" id="auth-pass" placeholder="••••••••" class="w-full bg-zinc-800 border border-zinc-700 p-3 rounded-xl outline-none focus:border-blue-500 text-white">
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 font-bold py-3 rounded-xl shadow-lg shadow-blue-600/30 text-white transition mt-2">
-                        Continue
+                    <button type="button" onclick="handleAuthAction()" id="auth-submit-btn" class="w-full bg-blue-600 hover:bg-blue-500 font-bold py-3 rounded-xl shadow-lg shadow-blue-600/30 text-white transition mt-2">
+                        Login Now
                     </button>
-                </form>
+                </div>
             </div>
         </div>
 
@@ -175,7 +175,7 @@
             </nav>
         </div>
 
-        <!-- FULLSCREEN STORY VIEWER MODAL (FACEBOOK STYLE) -->
+        <!-- FULLSCREEN STORY VIEWER MODAL -->
         <div id="modal-story-viewer" class="hidden fixed inset-0 z-50 bg-black flex flex-col justify-between p-4">
             <div class="flex justify-between items-center z-10">
                 <div class="flex items-center space-x-2">
@@ -207,16 +207,16 @@
             </div>
         </div>
 
-        <!-- POST MODAL WITH MULTIPLE MEDIA & PRIVACY -->
+        <!-- POST MODAL -->
         <div id="modal-post" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
             <div class="bg-zinc-900 border border-zinc-800 w-full max-w-sm rounded-2xl p-4 space-y-3">
                 <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
-                    <h3 class="font-bold text-xs text-white">Create Post (Photos/Videos)</h3>
+                    <h3 class="font-bold text-xs text-white">Create Post</h3>
                     <button onclick="closePostModal()" class="text-zinc-400"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <textarea id="post-text" placeholder="What's on your mind?" class="w-full h-16 bg-zinc-800 border border-zinc-700 p-2.5 rounded-xl text-xs text-white outline-none resize-none"></textarea>
                 <div>
-                    <label class="block text-[10px] text-zinc-400 font-bold mb-1">ADD IMAGES OR VIDEO (MAX 1 MIN)</label>
+                    <label class="block text-[10px] text-zinc-400 font-bold mb-1">ADD IMAGES OR VIDEO (< 1 MIN)</label>
                     <input type="file" id="post-files-input" accept="image/*,video/*" multiple class="w-full bg-zinc-800 border border-zinc-700 p-2 rounded-xl text-xs text-white outline-none" onchange="previewPostFiles(this)">
                 </div>
                 <div id="post-media-preview" class="grid grid-cols-3 gap-1 max-h-24 overflow-y-auto"></div>
@@ -233,15 +233,15 @@
             </div>
         </div>
 
-        <!-- STORY CREATION MODAL (PHOTO & VIDEO + PRIVACY) -->
+        <!-- STORY MODAL -->
         <div id="modal-story" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
             <div class="bg-zinc-900 border border-zinc-800 w-full max-w-sm rounded-2xl p-4 space-y-3">
                 <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
-                    <h3 class="font-bold text-xs text-white">Create Story (Photo/Video)</h3>
+                    <h3 class="font-bold text-xs text-white">Create Story</h3>
                     <button onclick="closeStoryModal()" class="text-zinc-400"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div>
-                    <label class="block text-[10px] text-zinc-400 font-bold mb-1">SELECT FILE (PHOTO OR VIDEO < 1 MIN)</label>
+                    <label class="block text-[10px] text-zinc-400 font-bold mb-1">SELECT FILE (PHOTO/VIDEO < 1 MIN)</label>
                     <input type="file" id="story-file-input" accept="image/*,video/*" class="w-full bg-zinc-800 border border-zinc-700 p-2 rounded-xl text-xs text-white outline-none" onchange="previewStoryMedia(this)">
                 </div>
                 <div id="story-preview-container" class="hidden text-center max-h-36 overflow-hidden"></div>
@@ -285,7 +285,7 @@
 
     </div>
 
-    <!-- FIREBASE & CORE LOGIC SCRIPT -->
+    <!-- FIREBASE MODULE SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -312,8 +312,8 @@
         let chatUnsubscribe = null;
         let pendingMedia = null;
         let tempProfileBase64 = null;
-        let tempStoryData = null; // {type, url}
-        let tempPostFiles = []; // Array of {type, url}
+        let tempStoryData = null;
+        let tempPostFiles = [];
         let activeEditItem = null;
         let activeStoryDocId = null;
 
@@ -323,13 +323,18 @@
             document.getElementById('group-name').classList.toggle('hidden', !isReg);
             document.getElementById('tab-login').className = !isReg ? "flex-1 py-2 rounded-lg bg-zinc-700 text-white" : "flex-1 py-2 rounded-lg text-zinc-400";
             document.getElementById('tab-register').className = isReg ? "flex-1 py-2 rounded-lg bg-zinc-700 text-white" : "flex-1 py-2 rounded-lg text-zinc-400";
+            document.getElementById('auth-submit-btn').innerText = isReg ? "Register Account" : "Login Now";
         };
 
-        window.handleAuthSubmit = async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
-            const name = document.getElementById('auth-name').value || "User";
+        window.handleAuthAction = async () => {
+            const email = document.getElementById('auth-email').value.trim();
+            const pass = document.getElementById('auth-pass').value.trim();
+            const name = document.getElementById('auth-name').value.trim() || "User";
+
+            if(!email || !pass) {
+                alert("Please enter both email and password!");
+                return;
+            }
 
             try {
                 if(currentAuthMode === 'register') {
@@ -346,7 +351,7 @@
                     await signInWithEmailAndPassword(auth, email, pass);
                 }
             } catch(err) {
-                alert("Auth Error: " + err.message);
+                alert("Authentication Failed: " + err.message);
             }
         };
 
@@ -411,7 +416,6 @@
             }
         };
 
-        // Story Media Preview (Photo or Video)
         window.previewStoryMedia = (input) => {
             if(input.files && input.files[0]) {
                 const file = input.files[0];
@@ -431,7 +435,6 @@
             }
         };
 
-        // Post Files Preview (Multiple Photos / Videos up to 1 min)
         window.previewPostFiles = (input) => {
             tempPostFiles = [];
             const container = document.getElementById('post-media-preview');
@@ -492,7 +495,6 @@
             });
         }
 
-        // Chat View
         window.openRealtimeChat = (peerUid, peerName) => {
             activePeer = { uid: peerUid, name: peerName };
             document.getElementById('chat-conversation-view').classList.remove('hidden');
@@ -603,7 +605,6 @@
             }
         };
 
-        // Posts Management with Multiple Media & Privacy & 3-Dot Menu
         window.submitRealtimePost = async () => {
             const text = document.getElementById('post-text').value.trim();
             const privacy = document.getElementById('post-privacy').value;
@@ -662,7 +663,6 @@
             });
         }
 
-        // Story Management with Fullscreen Facebook-style Viewer
         window.submitRealtimeStory = async () => {
             const caption = document.getElementById('story-caption').value;
             const privacy = document.getElementById('story-privacy').value;
@@ -675,7 +675,7 @@
             await addDoc(collection(db, "stories"), {
                 authorUid: currentUser.uid,
                 authorName: document.getElementById('profile-name-text').innerText || "User",
-                media: tempStoryData, // {type, url}
+                media: tempStoryData,
                 caption: caption,
                 privacy: privacy,
                 viewers: [],
@@ -727,7 +727,6 @@
             document.getElementById('viewer-author-name').innerText = authorName;
             document.getElementById('viewer-author-avatar').innerText = authorName.charAt(0).toUpperCase();
 
-            // Track viewers if not owner
             if(!isMyStory) {
                 const ref = doc(db, "stories", storyId);
                 const snap = await getDoc(ref);
@@ -741,10 +740,7 @@
                 }
             }
 
-            // Show stats only to owner, reactions to others
             const statsOwner = document.getElementById('viewer-stats-owner');
-            const reactionsOther = document.getElementById('viewer-reactions-other');
-
             if(isMyStory) {
                 statsOwner.classList.remove('hidden');
                 document.getElementById('story-views-count').innerText = `Views: ${viewers.length}`;
@@ -774,7 +770,6 @@
             }
         };
 
-        // 3-Dot Menu for Edit Privacy or Delete
         window.openEditMenu = (type, id, currentPrivacy) => {
             activeEditItem = { type, id };
             document.getElementById('edit-privacy-select').value = currentPrivacy;
