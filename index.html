@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AP Chat — Ultimate Social Networking & Messenger</title>
-    <!-- Tailwind CSS CDN -->
+    <title>AP Chat — Realtime Messenger Network</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -12,52 +11,31 @@
             theme: {
                 extend: {
                     colors: {
-                        messenger: {
-                            black: '#000000',
-                            card: '#121212',
-                            input: '#242526',
-                            bubbleSent: '#0084ff',
-                            bubbleRecv: '#242526',
-                            active: '#31a24c'
-                        }
+                        messenger: { black: '#000000', card: '#121212', input: '#242526', bubbleSent: '#0084ff', bubbleRecv: '#242526' }
                     }
                 }
             }
         }
     </script>
-    <!-- FontAwesome & Google Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #000000; color: #ffffff; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #3a3b3c; border-radius: 9999px; }
-        
-        /* Messenger Floral Wallpaper Pattern */
         .chat-wallpaper-floral {
-            background-color: #12103b;
-            background-image: 
-                radial-gradient(#2b2a70 1.5px, transparent 1.5px),
-                radial-gradient(#242261 1.5px, #12103b 1.5px);
-            background-size: 60px 60px;
-            background-position: 0 0, 30px 30px;
+            background-color: #0a0a16;
+            background-image: radial-gradient(#1e1d45 1.5px, transparent 1.5px);
+            background-size: 30px 30px;
         }
-
-        .story-ring-active {
-            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-            padding: 2.5px;
-        }
-        
-        .note-bubble {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.7);
-        }
+        .story-ring-active { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); padding: 2.5px; }
     </style>
 </head>
 <body class="h-full select-none overflow-hidden bg-black text-white">
 
     <div id="app" class="h-full flex flex-col max-w-md md:max-w-xl mx-auto bg-black shadow-2xl relative border-x border-zinc-900">
 
-        <!-- ================= AUTHENTICATION SCREEN ================= -->
+        <!-- AUTHENTICATION SCREEN -->
         <div id="screen-auth" class="fixed inset-0 z-50 bg-black flex items-center justify-center p-4">
             <div class="w-full max-w-sm bg-zinc-900 border border-zinc-800 p-6 rounded-3xl shadow-2xl space-y-6">
                 <div class="text-center space-y-1">
@@ -65,7 +43,7 @@
                         <i class="fa-solid fa-bolt"></i>
                     </div>
                     <h1 class="text-2xl font-black tracking-tight text-white pt-2">AP Chat</h1>
-                    <p class="text-xs text-zinc-400">Social Networking & Messenger</p>
+                    <p class="text-xs text-zinc-400">Realtime Network Platform</p>
                 </div>
 
                 <div class="flex bg-zinc-800 p-1 rounded-xl text-xs font-bold">
@@ -73,7 +51,7 @@
                     <button id="tab-register" onclick="setAuthTab('register')" class="flex-1 py-2 rounded-lg text-zinc-400">Register</button>
                 </div>
 
-                <form onsubmit="handleAuthSubmit(event)" class="space-y-3 text-xs">
+                <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-3 text-xs">
                     <div id="group-name" class="hidden">
                         <label class="block text-zinc-400 font-bold mb-1">FULL NAME</label>
                         <input type="text" id="auth-name" placeholder="আব্দুল্লাহ বিন ইলিয়াস" class="w-full bg-zinc-800 border border-zinc-700 p-3 rounded-xl outline-none focus:border-blue-500 text-white">
@@ -86,300 +64,98 @@
                         <label class="block text-zinc-400 font-bold mb-1">PASSWORD</label>
                         <input type="password" id="auth-pass" required placeholder="••••••••" class="w-full bg-zinc-800 border border-zinc-700 p-3 rounded-xl outline-none focus:border-blue-500 text-white">
                     </div>
-
-                    <div id="group-privacy" class="hidden">
-                        <label class="block text-zinc-400 font-bold mb-1">ACCOUNT VISIBILITY</label>
-                        <select id="auth-privacy" class="w-full bg-zinc-800 border border-zinc-700 p-3 rounded-xl outline-none text-white font-bold">
-                            <option value="public">🌐 Public Account (Anyone can Add Friend & Message)</option>
-                            <option value="private">🔒 Private Account (Message Request Required First)</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 font-bold py-3 rounded-xl shadow-lg shadow-blue-600/30 text-white transition mt-2">
-                        Continue to AP Chat
+                    <button type="submit" id="auth-btn-text" class="w-full bg-blue-600 hover:bg-blue-500 font-bold py-3 rounded-xl shadow-lg shadow-blue-600/30 text-white transition mt-2">
+                        Continue
                     </button>
                 </form>
             </div>
         </div>
 
-        <!-- ================= MAIN APP DASHBOARD ================= -->
+        <!-- MAIN DASHBOARD -->
         <div id="screen-main" class="hidden flex-1 flex flex-col h-full relative">
 
-            <!-- Top Header Bar -->
             <header class="bg-black border-b border-zinc-900 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
                 <div class="flex items-center space-x-3">
-                    <span id="app-heading" class="text-2xl font-black text-white tracking-tight">AP Chat</span>
-                    <span id="account-type-badge" class="text-[10px] bg-blue-900/50 border border-blue-500/40 text-blue-400 px-2 py-0.5 rounded-full font-bold uppercase">PUBLIC</span>
+                    <span class="text-2xl font-black text-white tracking-tight">AP Chat</span>
+                    <span id="user-display-tag" class="text-[10px] bg-blue-900/50 border border-blue-500/40 text-blue-400 px-2 py-0.5 rounded-full font-bold uppercase">LIVE</span>
                 </div>
                 <div class="flex items-center space-x-3 text-white">
-                    <button onclick="openPostModal()" class="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-300 hover:bg-zinc-800" title="Create Post"><i class="fa-solid fa-plus text-xs"></i></button>
-                    <button onclick="switchTab('messenger')" class="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-300 hover:bg-zinc-800 relative" title="Messenger">
+                    <button onclick="openPostModal()" class="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-300 hover:bg-zinc-800"><i class="fa-solid fa-plus text-xs"></i></button>
+                    <button onclick="switchTab('messenger')" class="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-300 hover:bg-zinc-800 relative">
                         <i class="fa-solid fa-comment-dots text-xs"></i>
-                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">3</span>
                     </button>
                 </div>
             </header>
 
-            <!-- Scrollable Body Content -->
             <main class="flex-1 overflow-y-auto custom-scrollbar relative">
                 
-                <!-- 1. HOME FEED TAB -->
+                <!-- FEED TAB -->
                 <div id="tab-feed" class="p-3 space-y-4">
-                    <!-- Stories Bar -->
                     <div class="bg-zinc-900 p-3 rounded-2xl border border-zinc-800">
                         <div class="flex justify-between items-center text-xs font-bold mb-2">
-                            <span>Stories (24h Expiry)</span>
+                            <span>Stories (24h)</span>
                             <span onclick="openStoryModal()" class="text-blue-500 cursor-pointer">+ Add Story</span>
                         </div>
-                        <div id="feed-stories-carousel" class="flex space-x-3 overflow-x-auto pb-1 custom-scrollbar">
-                            <!-- Dynamic Stories -->
-                        </div>
+                        <div id="feed-stories-carousel" class="flex space-x-3 overflow-x-auto pb-1 custom-scrollbar"></div>
                     </div>
 
-                    <!-- Create Post Box -->
                     <div class="bg-zinc-900 p-3 rounded-2xl border border-zinc-800 flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-sm">A</div>
+                        <div id="my-avatar-icon" class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-sm">A</div>
                         <input type="text" placeholder="What's on your mind?" onclick="openPostModal()" readonly class="flex-1 bg-zinc-800 px-4 py-2 rounded-full text-xs text-zinc-400 cursor-pointer">
                     </div>
 
-                    <!-- Feed Stream -->
-                    <div id="posts-stream" class="space-y-4">
-                        <!-- Dynamic Feed Posts -->
-                    </div>
+                    <div id="posts-stream" class="space-y-4"></div>
                 </div>
 
-                <!-- 2. MESSENGER INBOX TAB -->
+                <!-- MESSENGER INBOX TAB -->
                 <div id="tab-messenger" class="hidden space-y-4 p-3">
-                    
-                    <!-- Search Bar -->
-                    <div class="bg-zinc-900 px-4 py-2.5 rounded-2xl flex items-center space-x-2 text-zinc-400">
-                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                        <input type="text" placeholder="Ask Meta AI or search" class="bg-transparent text-xs w-full outline-none text-white placeholder-zinc-500">
-                    </div>
-
-                    <!-- Messenger Notes & Active Friends Row -->
-                    <div class="flex space-x-4 overflow-x-auto pb-2 custom-scrollbar items-start">
-                        <div class="flex flex-col items-center space-y-1 flex-shrink-0 cursor-pointer" onclick="openStoryModal()">
-                            <div class="relative w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center border border-zinc-700">
-                                <div class="w-14 h-14 bg-zinc-700 rounded-full flex items-center justify-center font-bold text-lg text-white">
-                                    <i class="fa-solid fa-user"></i>
-                                </div>
-                                <div class="absolute bottom-0 right-0 w-5 h-5 bg-zinc-900 text-white rounded-full flex items-center justify-center text-xs font-bold border border-zinc-800">+</div>
-                            </div>
-                            <span class="text-[10px] text-zinc-400 font-medium">Create story</span>
-                        </div>
-
-                        <div id="active-heads-list" class="flex space-x-4">
-                            <!-- Dynamic Active Heads with Notes -->
-                        </div>
-                    </div>
-
-                    <!-- Inbox Conversations List -->
-                    <div id="inbox-list" class="space-y-1">
-                        <!-- Dynamic Inbox Items -->
-                    </div>
+                    <div id="inbox-list" class="space-y-1"></div>
                 </div>
 
-                <!-- 3. CHAT CONVERSATION VIEW -->
+                <!-- CHAT CONVERSATION VIEW -->
                 <div id="chat-conversation-view" class="hidden absolute inset-0 z-40 bg-black flex flex-col">
-                    <!-- Chat Header -->
                     <div class="p-3 bg-zinc-950 border-b border-zinc-900 flex items-center justify-between">
                         <div class="flex items-center space-x-3">
                             <button onclick="closeChatView()" class="text-blue-500 text-lg p-1"><i class="fa-solid fa-arrow-left"></i></button>
-                            <div class="relative cursor-pointer" onclick="openChatInfoPage()">
-                                <div id="active-chat-avatar" class="w-9 h-9 rounded-full bg-pink-600 flex items-center justify-center font-bold text-xs text-white">B</div>
-                                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border border-black"></span>
-                            </div>
-                            <div class="cursor-pointer" onclick="openChatInfoPage()">
-                                <h3 id="active-chat-name" class="text-sm font-bold text-white flex items-center space-x-1">
-                                    <span>Bou Pakhi</span>
-                                    <span>💖</span>
-                                </h3>
-                                <p class="text-[10px] text-zinc-400">Active 1 hour ago</p>
+                            <div id="active-chat-avatar" class="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-xs text-white">U</div>
+                            <div>
+                                <h3 id="active-chat-name" class="text-sm font-bold text-white">User Name</h3>
+                                <p class="text-[10px] text-green-400">Online Realtime</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-4 text-cyan-400 text-lg">
-                            <i class="fa-solid fa-phone cursor-pointer" onclick="alert('Starting Audio Call...')"></i>
-                            <i class="fa-solid fa-video cursor-pointer" onclick="alert('Starting Video Call...')"></i>
-                            <i class="fa-solid fa-circle-info cursor-pointer text-cyan-400" onclick="openChatInfoPage()"></i>
+                            <i class="fa-solid fa-phone cursor-pointer" onclick="alert('Audio calling feature queued for WebRTC module.')"></i>
+                            <i class="fa-solid fa-video cursor-pointer" onclick="alert('Video calling feature queued for WebRTC module.')"></i>
                         </div>
                     </div>
 
-                    <!-- Messages Wallpaper Area (Floral Pattern) -->
-                    <div id="chat-wallpaper-area" class="flex-1 chat-wallpaper-floral p-3 overflow-y-auto custom-scrollbar space-y-3 relative">
-                        <!-- Dynamic Message Bubbles -->
-                    </div>
+                    <div id="chat-wallpaper-area" class="flex-1 chat-wallpaper-floral p-3 overflow-y-auto custom-scrollbar space-y-3 relative"></div>
 
-                    <!-- Chat Message Composer -->
                     <div class="p-2 bg-black border-t border-zinc-900 flex items-center space-x-2">
-                        <button onclick="alert('Attachment options')" class="text-cyan-400 p-2"><i class="fa-solid fa-circle-plus text-lg"></i></button>
-                        <button onclick="alert('Camera')" class="text-cyan-400 p-2"><i class="fa-solid fa-camera text-lg"></i></button>
-                        <button onclick="alert('Gallery')" class="text-cyan-400 p-2"><i class="fa-solid fa-image text-lg"></i></button>
-                        <button onclick="simulateVoiceSend()" class="text-cyan-400 p-2"><i class="fa-solid fa-microphone text-lg"></i></button>
-                        <input type="text" id="chat-text-input" placeholder="Message" onkeypress="if(event.key==='Enter') sendDirectMessage()" class="flex-1 bg-zinc-900 border-none px-4 py-2 rounded-full text-xs outline-none text-white">
-                        <button onclick="sendDirectMessage()" class="text-cyan-400 p-2"><i class="fa-solid fa-thumbs-up text-lg"></i></button>
+                        <button onclick="alert('Voice recording queued.')" class="text-cyan-400 p-2"><i class="fa-solid fa-microphone text-lg"></i></button>
+                        <input type="text" id="chat-text-input" placeholder="Message..." onkeypress="if(event.key==='Enter') sendRealtimeMessage()" class="flex-1 bg-zinc-900 border-none px-4 py-2 rounded-full text-xs outline-none text-white">
+                        <button onclick="sendRealtimeMessage()" class="text-cyan-400 p-2"><i class="fa-solid fa-paper-plane text-lg"></i></button>
                     </div>
                 </div>
 
-                <!-- 4. CHAT INFO & PRIVACY SETTINGS -->
-                <div id="chat-info-screen" class="hidden absolute inset-0 z-50 bg-black flex flex-col overflow-y-auto custom-scrollbar">
-                    <div class="p-4 flex justify-between items-center border-b border-zinc-900 sticky top-0 bg-black/90 backdrop-blur">
-                        <button onclick="closeChatInfoPage()" class="text-white text-lg"><i class="fa-solid fa-arrow-left"></i></button>
-                        <i class="fa-solid fa-ellipsis-vertical text-white"></i>
-                    </div>
-
-                    <div class="p-6 text-center space-y-4 border-b border-zinc-900">
-                        <div class="w-24 h-24 rounded-full bg-indigo-600 text-white text-3xl font-bold mx-auto flex items-center justify-center shadow-2xl" id="info-avatar">B</div>
-                        <h2 class="text-2xl font-bold text-white flex items-center justify-center space-x-1" id="info-name">
-                            <span>Bou Pakhi</span>
-                            <span>💖</span>
-                        </h2>
-
-                        <!-- Action Shortcuts Grid -->
-                        <div class="flex justify-around pt-2 px-4">
-                            <div class="flex flex-col items-center space-y-1 cursor-pointer" onclick="alert('Opening Profile')">
-                                <div class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center text-white"><i class="fa-brands fa-facebook"></i></div>
-                                <span class="text-[10px] text-zinc-400">Profile</span>
-                            </div>
-                            <div class="flex flex-col items-center space-y-1 cursor-pointer" onclick="alert('Change Nickname')">
-                                <div class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center text-white"><i class="fa-solid fa-font"></i></div>
-                                <span class="text-[10px] text-zinc-400">Nicknames</span>
-                            </div>
-                            <div class="flex flex-col items-center space-y-1 cursor-pointer" onclick="alert('Search in conversation')">
-                                <div class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center text-white"><i class="fa-solid fa-magnifying-glass"></i></div>
-                                <span class="text-[10px] text-zinc-400">Search</span>
-                            </div>
-                            <div class="flex flex-col items-center space-y-1 cursor-pointer" onclick="alert('Customize Theme')">
-                                <div class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center text-white"><i class="fa-solid fa-palette"></i></div>
-                                <span class="text-[10px] text-zinc-400">Customize</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Shared Media Gallery -->
-                    <div class="p-4 space-y-3 border-b border-zinc-900">
-                        <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Chat info</h4>
-                        <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-2 flex space-x-2">
-                            <div class="w-1/2 h-28 bg-zinc-900 rounded-xl overflow-hidden relative">
-                                <img src="https://images.unsplash.com/photo-1518791841217-8f162f1e1131?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
-                            </div>
-                            <div class="w-1/2 h-28 grid grid-cols-2 gap-1">
-                                <div class="bg-zinc-900 rounded-lg"></div>
-                                <div class="bg-zinc-900 rounded-lg"></div>
-                                <div class="bg-zinc-900 rounded-lg"></div>
-                                <div class="bg-zinc-900 rounded-lg"></div>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-3 text-xs text-zinc-300 py-1 cursor-pointer">
-                            <i class="fa-solid fa-images text-zinc-400 text-sm"></i>
-                            <span>View all media, files & links</span>
-                        </div>
-                        <div class="flex items-center space-x-3 text-xs text-zinc-300 py-1 cursor-pointer">
-                            <i class="fa-solid fa-thumbtack text-zinc-400 text-sm"></i>
-                            <span>Pinned messages</span>
-                        </div>
-                    </div>
-
-                    <!-- Actions & Support List -->
-                    <div class="p-4 space-y-4">
-                        <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Actions</h4>
-                        <div class="space-y-4 text-xs text-zinc-200">
-                            <div class="flex items-center space-x-3 cursor-pointer">
-                                <i class="fa-solid fa-bell text-zinc-400 text-sm"></i>
-                                <span>Mute Notifications</span>
-                            </div>
-                            <div class="flex items-center justify-between cursor-pointer">
-                                <div class="flex items-center space-x-3">
-                                    <i class="fa-solid fa-volume-high text-zinc-400 text-sm"></i>
-                                    <div>
-                                        <span>Notifications & sounds</span>
-                                        <p class="text-[10px] text-zinc-500">On</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-3 cursor-pointer">
-                                <i class="fa-solid fa-user-group text-zinc-400 text-sm"></i>
-                                <span>Create group chat</span>
-                            </div>
-                            <div class="flex items-center space-x-3 text-zinc-200 cursor-pointer" onclick="alert('User Blocked')">
-                                <i class="fa-solid fa-circle-minus text-zinc-400 text-sm"></i>
-                                <span>Block</span>
-                            </div>
-                            <div class="flex items-center space-x-3 text-zinc-200 cursor-pointer" onclick="alert('User Restricted')">
-                                <i class="fa-solid fa-user-shield text-zinc-400 text-sm"></i>
-                                <span>Restrict</span>
-                            </div>
-                            <div class="flex items-center space-x-3 text-red-500 font-bold cursor-pointer" onclick="alert('Chat Deleted')">
-                                <i class="fa-solid fa-trash text-sm"></i>
-                                <span>Delete chat</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 5. SEARCH & DISCOVER TAB -->
+                <!-- DISCOVER / SEARCH USER TAB -->
                 <div id="tab-search" class="hidden p-3 space-y-3">
-                    <div class="bg-zinc-900 p-2.5 rounded-xl border border-zinc-800 flex items-center space-x-2">
-                        <i class="fa-solid fa-magnifying-glass text-zinc-400 text-xs"></i>
-                        <input type="text" placeholder="Search people on AP Chat..." class="w-full text-xs bg-transparent outline-none text-white">
-                    </div>
-                    
-                    <div class="bg-zinc-900 rounded-2xl border border-zinc-800 p-3 space-y-3">
-                        <h4 class="text-xs font-bold text-zinc-400">Suggested Profiles</h4>
-                        
-                        <!-- Profile (Public) -->
-                        <div class="flex items-center justify-between py-2 border-b border-zinc-800">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">J</div>
-                                <div>
-                                    <h5 class="text-xs font-bold text-white">Jisan Ahmmed <span class="text-[9px] bg-emerald-900/50 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.2 rounded">Public</span></h5>
-                                    <p class="text-[10px] text-zinc-400">Physics CR</p>
-                                </div>
-                            </div>
-                            <button onclick="alert('Friend Request Sent!')" class="bg-blue-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg">+ Add Friend</button>
-                        </div>
-
-                        <!-- Profile (Private) -->
-                        <div class="flex items-center justify-between py-2">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-xs">R</div>
-                                <div>
-                                    <h5 class="text-xs font-bold text-white">Rubayet Islam <span class="text-[9px] bg-purple-900/50 text-purple-400 border border-purple-500/30 px-1.5 py-0.2 rounded">Private</span></h5>
-                                    <p class="text-[10px] text-zinc-400">Rajendra College</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-1">
-                                <button onclick="alert('Add Friend Locked! Private profile requires Message Request first.')" class="bg-zinc-800 text-zinc-500 text-[10px] font-bold px-2 py-1 rounded cursor-not-allowed"><i class="fa-solid fa-lock text-[9px]"></i> Add Friend</button>
-                                <button onclick="openChatView('u2', 'Rubayet Islam')" class="bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg">Message</button>
-                            </div>
-                        </div>
-                    </div>
+                    <h4 class="text-xs font-bold text-zinc-400 px-1">Registered Users Across World</h4>
+                    <div id="global-users-list" class="space-y-2"></div>
                 </div>
 
-                <!-- 6. USER PROFILE & APP SETTINGS TAB -->
+                <!-- PROFILE TAB -->
                 <div id="tab-profile" class="hidden p-4 space-y-4">
                     <div class="bg-zinc-900 p-6 rounded-3xl border border-zinc-800 text-center space-y-3">
-                        <div class="w-20 h-20 bg-blue-600 text-white rounded-full mx-auto flex items-center justify-center font-bold text-3xl shadow-xl">A</div>
-                        <h2 class="text-lg font-bold text-white">আব্দুল্লাহ বিন ইলিয়াস</h2>
-                        <p class="text-xs text-zinc-400">abdullah@example.com</p>
-
-                        <div class="pt-2">
-                            <label class="block text-[10px] text-zinc-500 font-bold uppercase mb-1">Account Visibility Settings</label>
-                            <select id="setting-privacy-mode" onchange="updateAccountPrivacy(this.value)" class="bg-zinc-800 text-xs text-blue-400 font-bold p-2 rounded-xl border border-zinc-700 outline-none">
-                                <option value="public">🌐 Public Account Mode</option>
-                                <option value="private">🔒 Private Account Mode</option>
-                            </select>
-                        </div>
+                        <div id="profile-avatar-box" class="w-20 h-20 bg-blue-600 text-white rounded-full mx-auto flex items-center justify-center font-bold text-3xl shadow-xl">A</div>
+                        <h2 id="profile-name-text" class="text-lg font-bold text-white">User</h2>
+                        <p id="profile-email-text" class="text-xs text-zinc-400">email@example.com</p>
                     </div>
-
-                    <button onclick="triggerLogout()" class="w-full bg-red-600/20 text-red-500 font-bold py-3 rounded-2xl border border-red-500/30 text-xs">
-                        Log Out
-                    </button>
+                    <button onclick="triggerLogout()" class="w-full bg-red-600/20 text-red-500 font-bold py-3 rounded-2xl border border-red-500/30 text-xs">Log Out</button>
                 </div>
 
             </main>
 
-            <!-- Bottom Navigation Bar -->
             <nav class="bg-black border-t border-zinc-900 flex justify-around py-3 sticky bottom-0 z-30">
                 <button onclick="switchTab('feed')" id="nav-btn-feed" class="text-blue-500 flex flex-col items-center"><i class="fa-solid fa-house text-lg"></i><span class="text-[9px] font-bold mt-0.5">Feed</span></button>
                 <button onclick="switchTab('messenger')" id="nav-btn-messenger" class="text-zinc-500 flex flex-col items-center"><i class="fa-solid fa-comment text-lg"></i><span class="text-[9px] font-bold mt-0.5">Chats</span></button>
@@ -388,69 +164,42 @@
             </nav>
         </div>
 
-        <!-- ================= MODAL: CREATE POST WITH 4-STEP PRIVACY ================= -->
+        <!-- POST MODAL -->
         <div id="modal-post" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
             <div class="bg-zinc-900 border border-zinc-800 w-full max-w-sm rounded-2xl p-4 space-y-3">
                 <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
-                    <h3 class="font-bold text-xs text-white">Create Post</h3>
+                    <h3 class="font-bold text-xs text-white">Create Feed Post</h3>
                     <button onclick="closePostModal()" class="text-zinc-400"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                <textarea id="post-text" placeholder="What's on your mind?" class="w-full h-20 bg-zinc-800 border border-zinc-700 p-2.5 rounded-xl text-xs text-white outline-none resize-none"></textarea>
-
-                <div>
-                    <label class="block text-[10px] text-zinc-400 font-bold mb-1">AUDIENCE PRIVACY</label>
-                    <select id="post-privacy" class="w-full bg-zinc-800 border border-zinc-700 p-2 rounded-xl text-xs font-bold text-blue-400 outline-none">
-                        <option value="🌐 Public">🌐 Public</option>
-                        <option value="👥 Friends">👥 Friends Only</option>
-                        <option value="🔒 Custom">🔒 Custom</option>
-                        <option value="🚫 Hide From">🚫 Hide From Specific Users</option>
-                    </select>
-                </div>
-
-                <button onclick="submitPost()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Publish Post</button>
+                <textarea id="post-text" placeholder="Write something..." class="w-full h-20 bg-zinc-800 border border-zinc-700 p-2.5 rounded-xl text-xs text-white outline-none resize-none"></textarea>
+                <button onclick="submitRealtimePost()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Post</button>
             </div>
         </div>
 
-        <!-- ================= MODAL: CREATE STORY WITH 4-STEP PRIVACY & TIMING ================= -->
+        <!-- STORY MODAL WITH IMAGE UPLOAD -->
         <div id="modal-story" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
             <div class="bg-zinc-900 border border-zinc-800 w-full max-w-sm rounded-2xl p-4 space-y-3">
                 <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
-                    <h3 class="font-bold text-xs text-white">Create Story (Up to 60s)</h3>
+                    <h3 class="font-bold text-xs text-white">Add Photo Story</h3>
                     <button onclick="closeStoryModal()" class="text-zinc-400"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                <input type="text" id="story-caption" placeholder="Add story caption..." class="w-full bg-zinc-800 border border-zinc-700 p-2.5 rounded-xl text-xs text-white outline-none">
-                <input type="url" id="story-link" placeholder="Custom link (https://...)" class="w-full bg-zinc-800 border border-zinc-700 p-2.5 rounded-xl text-xs text-white outline-none">
-
-                <div class="bg-zinc-800/50 p-2 rounded-xl border border-zinc-700 space-y-1">
-                    <span class="text-[10px] text-zinc-400 font-bold">Video Timing Range</span>
-                    <div class="flex space-x-2">
-                        <input type="number" id="story-start" placeholder="Start (0s)" value="0" min="0" max="60" class="w-1/2 bg-zinc-800 border border-zinc-700 p-1.5 rounded text-xs text-white">
-                        <input type="number" id="story-end" placeholder="End (30s)" value="30" min="1" max="60" class="w-1/2 bg-zinc-800 border border-zinc-700 p-1.5 rounded text-xs text-white">
-                    </div>
-                </div>
-
                 <div>
-                    <label class="block text-[10px] text-zinc-400 font-bold mb-1">STORY PRIVACY</label>
-                    <select id="story-privacy" class="w-full bg-zinc-800 border border-zinc-700 p-2 rounded-xl text-xs font-bold text-blue-400 outline-none">
-                        <option value="🌐 Public">🌐 Public</option>
-                        <option value="👥 Friends">👥 Friends Only</option>
-                        <option value="🔒 Custom">🔒 Custom</option>
-                        <option value="🚫 Hide From">🚫 Hide From Specific Users</option>
-                    </select>
+                    <label class="block text-[10px] text-zinc-400 font-bold mb-1">SELECT IMAGE</label>
+                    <input type="file" id="story-file-input" accept="image/*" class="w-full bg-zinc-800 border border-zinc-700 p-2 rounded-xl text-xs text-white outline-none">
                 </div>
-
-                <button onclick="submitStory()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Publish Story</button>
+                <input type="text" id="story-caption" placeholder="Add story caption..." class="w-full bg-zinc-800 border border-zinc-700 p-2.5 rounded-xl text-xs text-white outline-none">
+                <button onclick="submitRealtimeStory()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Publish Story</button>
             </div>
         </div>
 
     </div>
 
-    <!-- ================= FIREBASE & APP LOGIC ================= -->
+    <!-- FIREBASE MODULE LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, onSnapshot, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Firebase Configuration (Integrated)
         const firebaseConfig = {
             apiKey: "AIzaSyBdLGspLUDEQRRf_Hr8655pJrm889BDr0g",
             authDomain: "ap-chat-live-5f0c9.firebaseapp.com",
@@ -463,248 +212,248 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
-        window.db = db;
-    </script>
 
-    <!-- ================= JAVASCRIPT APPLICATION LOGIC ================= -->
-    <script>
-        // State
         let currentUser = null;
-        let accountPrivacy = 'public';
-        let activeChatUser = null;
+        let activePeer = null;
+        let currentAuthMode = 'login';
+        let chatUnsubscribe = null;
 
-        let mockNotes = [
-            { id: 1, author: 'Resad', note: 'Koro Go K Romeo Bro...', time: '1h ago' },
-            { id: 2, author: 'Arfin', note: 'তোমার চোখে আকাশ আমার', time: '2h ago' },
-            { id: 3, author: 'Mashrafi Bin', note: '🌊 Beach Day', time: '3h ago' },
-            { id: 4, author: 'Sheikh Sajidul', note: 'Campus life', time: '4h ago' }
-        ];
-
-        let mockInbox = [
-            { id: 'u1', name: 'Bou Pakhi💖', pin: true, lastMsg: 'Aii id te ki kors', time: 'Sat', unread: 0, avatar: 'B' },
-            { id: 'u2', name: 'Bou Jaan, 👧🥰📍', pin: true, lastMsg: 'You sent an attachment.', time: 'Oct 16', unread: 0, avatar: 'J' },
-            { id: 'u3', name: 'Ni L OY', pin: false, lastMsg: '4 new messages', time: 'Sun', unread: 4, avatar: 'N' },
-            { id: 'u4', name: 'Canis lupus familiaris🐕🐩', pin: false, lastMsg: '😊', time: 'Sun', unread: 0, avatar: 'C' },
-            { id: 'u5', name: 'Sheikh Sajidul Islam Saa...', pin: false, lastMsg: '6 new messages', time: 'Sun', unread: 6, avatar: 'S' }
-        ];
-
-        let mockMessagesData = {
-            'u1': [
-                { id: 1, text: 'Sure', sender: 'them' },
-                { id: 2, text: 'Manik re disi\nTai tmre shunailam\nKaron ss ta dibo tmre', replyTo: 'Attachment 📎', sender: 'me' },
-                { id: 3, text: 'Ohh', sender: 'them' },
-                { id: 4, image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?auto=format&fit=crop&w=400&q=80', sender: 'me' },
-                { id: 5, text: 'Kando\nHeheeeeeheee', replyTo: 'Bou Pakhi💖 replied to you', sender: 'them' }
-            ]
-        };
-
-        let mockPosts = [
-            { id: 1, author: 'Sheikh Sajidul', text: 'New updates on AP Chat are live! 🎉', privacy: '🌐 Public', time: '10m ago' }
-        ];
-
-        // Auth Operations
-        function setAuthTab(mode) {
+        window.setAuthTab = (mode) => {
+            currentAuthMode = mode;
             const isReg = mode === 'register';
             document.getElementById('group-name').classList.toggle('hidden', !isReg);
-            document.getElementById('group-privacy').classList.toggle('hidden', !isReg);
             document.getElementById('tab-login').className = !isReg ? "flex-1 py-2 rounded-lg bg-zinc-700 text-white" : "flex-1 py-2 rounded-lg text-zinc-400";
             document.getElementById('tab-register').className = isReg ? "flex-1 py-2 rounded-lg bg-zinc-700 text-white" : "flex-1 py-2 rounded-lg text-zinc-400";
-        }
+        };
 
-        function handleAuthSubmit(e) {
+        window.handleAuthSubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('auth-email').value;
-            currentUser = { email: email, name: document.getElementById('auth-name').value || "Abdullah" };
-            accountPrivacy = document.getElementById('auth-privacy').value || 'public';
+            const pass = document.getElementById('auth-pass').value;
+            const name = document.getElementById('auth-name').value || "User";
 
-            document.getElementById('account-type-badge').innerText = accountPrivacy.toUpperCase();
-            document.getElementById('screen-auth').classList.add('hidden');
-            document.getElementById('screen-main').classList.remove('hidden');
+            try {
+                if(currentAuthMode === 'register') {
+                    const res = await createUserWithEmailAndPassword(auth, email, pass);
+                    await setDoc(doc(db, "users", res.user.uid), {
+                        uid: res.user.uid,
+                        name: name,
+                        email: email,
+                        createdAt: Date.now()
+                    });
+                } else {
+                    await signInWithEmailAndPassword(auth, email, pass);
+                }
+            } catch(err) {
+                alert("Auth Error: " + err.message);
+            }
+        };
 
-            renderActiveHeads();
-            renderInbox();
-            renderPosts();
-            renderStories();
+        onAuthStateChanged(auth, (user) => {
+            if(user) {
+                currentUser = user;
+                document.getElementById('screen-auth').classList.add('hidden');
+                document.getElementById('screen-main').classList.remove('hidden');
+                
+                document.getElementById('profile-email-text').innerText = user.email;
+                
+                listenGlobalUsers();
+                listenPosts();
+                listenStories();
+            } else {
+                currentUser = null;
+                document.getElementById('screen-main').classList.add('hidden');
+                document.getElementById('screen-auth').classList.remove('hidden');
+            }
+        });
+
+        window.triggerLogout = () => signOut(auth);
+
+        function listenGlobalUsers() {
+            onSnapshot(collection(db, "users"), (snapshot) => {
+                const list = document.getElementById('global-users-list');
+                const inbox = document.getElementById('inbox-list');
+                list.innerHTML = '';
+                inbox.innerHTML = '';
+
+                snapshot.forEach((docSnap) => {
+                    const u = docSnap.data();
+                    if(u.uid === currentUser.uid) {
+                        document.getElementById('profile-name-text').innerText = u.name;
+                        document.getElementById('my-avatar-icon').innerText = u.name.charAt(0).toUpperCase();
+                        document.getElementById('profile-avatar-box').innerText = u.name.charAt(0).toUpperCase();
+                        return;
+                    }
+
+                    list.innerHTML += `
+                        <div class="bg-zinc-900 border border-zinc-800 p-3 rounded-2xl flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-sm text-white">${u.name.charAt(0).toUpperCase()}</div>
+                                <div>
+                                    <h5 class="text-xs font-bold text-white">${u.name}</h5>
+                                    <p class="text-[10px] text-zinc-400">${u.email}</p>
+                                </div>
+                            </div>
+                            <button onclick="openRealtimeChat('${u.uid}', '${u.name}')" class="bg-blue-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg">Message</button>
+                        </div>
+                    `;
+
+                    inbox.innerHTML += `
+                        <div onclick="openRealtimeChat('${u.uid}', '${u.name}')" class="p-3 rounded-2xl hover:bg-zinc-900 flex items-center space-x-3 cursor-pointer border-b border-zinc-900">
+                            <div class="w-11 h-11 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-sm text-white">${u.name.charAt(0).toUpperCase()}</div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-xs text-white">${u.name}</h4>
+                                <p class="text-[10px] text-zinc-500">Tap to chat in realtime</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
         }
 
-        function triggerLogout() {
-            document.getElementById('screen-main').classList.add('hidden');
-            document.getElementById('screen-auth').classList.remove('hidden');
+        window.openRealtimeChat = (peerUid, peerName) => {
+            activePeer = { uid: peerUid, name: peerName };
+            document.getElementById('chat-conversation-view').classList.remove('hidden');
+            document.getElementById('active-chat-name').innerText = peerName;
+            document.getElementById('active-chat-avatar').innerText = peerName.charAt(0).toUpperCase();
+
+            const chatId = currentUser.uid < peerUid ? `${currentUser.uid}_${peerUid}` : `${peerUid}_${currentUser.uid}`;
+            
+            if(chatUnsubscribe) chatUnsubscribe();
+
+            const q = query(collection(db, "chats", chatId, "messages"), orderBy("timestamp", "asc"));
+            chatUnsubscribe = onSnapshot(q, (snapshot) => {
+                const area = document.getElementById('chat-wallpaper-area');
+                area.innerHTML = '';
+                snapshot.forEach((docSnap) => {
+                    const msg = docSnap.data();
+                    const isMe = msg.senderUid === currentUser.uid;
+                    area.innerHTML += `
+                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+                            <div class="max-w-[80%] ${isMe ? 'bg-blue-600 text-white rounded-2xl rounded-tr-none' : 'bg-zinc-800 text-white rounded-2xl rounded-tl-none'} p-3 text-xs shadow-md">
+                                <p>${msg.text}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                area.scrollTop = area.scrollHeight;
+            });
+        };
+
+        window.closeChatView = () => {
+            document.getElementById('chat-conversation-view').classList.add('hidden');
+            if(chatUnsubscribe) chatUnsubscribe();
+        };
+
+        window.sendRealtimeMessage = async () => {
+            const input = document.getElementById('chat-text-input');
+            const text = input.value.trim();
+            if(!text || !activePeer) return;
+
+            const chatId = currentUser.uid < activePeer.uid ? `${currentUser.uid}_${activePeer.uid}` : `${activePeer.uid}_${currentUser.uid}`;
+            input.value = '';
+
+            await addDoc(collection(db, "chats", chatId, "messages"), {
+                senderUid: currentUser.uid,
+                text: text,
+                timestamp: Date.now()
+            });
+        };
+
+        window.submitRealtimePost = async () => {
+            const text = document.getElementById('post-text').value.trim();
+            if(!text) return;
+            await addDoc(collection(db, "posts"), {
+                authorName: document.getElementById('profile-name-text').innerText || "User",
+                text: text,
+                timestamp: Date.now()
+            });
+            document.getElementById('post-text').value = '';
+            closePostModal();
+        };
+
+        function listenPosts() {
+            const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+            onSnapshot(q, (snapshot) => {
+                const stream = document.getElementById('posts-stream');
+                stream.innerHTML = '';
+                snapshot.forEach((docSnap) => {
+                    const p = docSnap.data();
+                    stream.innerHTML += `
+                        <div class="bg-zinc-900 p-3 rounded-2xl border border-zinc-800 space-y-2 text-xs">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-white">${p.authorName}</span>
+                                <span class="text-[9px] text-zinc-500">${new Date(p.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                            </div>
+                            <p class="text-zinc-300">${p.text}</p>
+                        </div>
+                    `;
+                });
+            });
         }
 
-        function updateAccountPrivacy(val) {
-            accountPrivacy = val;
-            document.getElementById('account-type-badge').innerText = val.toUpperCase();
-            alert("Account Privacy updated to " + val.toUpperCase());
+        window.submitRealtimeStory = async () => {
+            const fileInput = document.getElementById('story-file-input');
+            const caption = document.getElementById('story-caption').value;
+            
+            if(fileInput.files.length === 0) {
+                alert("Please select an image file for your story!");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const imgDataUrl = e.target.result;
+                await addDoc(collection(db, "stories"), {
+                    authorName: document.getElementById('profile-name-text').innerText || "User",
+                    imageUrl: imgDataUrl,
+                    caption: caption,
+                    timestamp: Date.now()
+                });
+                closeStoryModal();
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        };
+
+        function listenStories() {
+            const q = query(collection(db, "stories"), orderBy("timestamp", "desc"));
+            onSnapshot(q, (snapshot) => {
+                const carousel = document.getElementById('feed-stories-carousel');
+                carousel.innerHTML = `
+                    <div onclick="openStoryModal()" class="flex-shrink-0 w-16 h-24 bg-zinc-800 rounded-2xl border border-dashed border-zinc-700 flex flex-col items-center justify-center cursor-pointer">
+                        <span class="text-xl text-blue-500 font-bold">+</span>
+                        <span class="text-[9px] text-zinc-400 font-bold">Add Photo</span>
+                    </div>
+                `;
+                snapshot.forEach((docSnap) => {
+                    const s = docSnap.data();
+                    carousel.innerHTML += `
+                        <div class="flex-shrink-0 w-16 h-24 story-ring-active rounded-2xl overflow-hidden relative cursor-pointer">
+                            <img src="${s.imageUrl}" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-1 flex items-end">
+                                <span class="text-[8px] font-bold text-white truncate">${s.authorName}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
         }
 
-        // Navigation Tab Switching
-        function switchTab(tab) {
+        window.switchTab = (tab) => {
             ['feed', 'messenger', 'search', 'profile'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
                 document.getElementById(`nav-btn-${t}`).className = "text-zinc-500 flex flex-col items-center";
             });
             document.getElementById(`tab-${tab}`).classList.remove('hidden');
             document.getElementById(`nav-btn-${tab}`).className = "text-blue-500 flex flex-col items-center";
-        }
+        };
 
-        // Active Heads & Messenger Notes
-        function renderActiveHeads() {
-            const container = document.getElementById('active-heads-list');
-            container.innerHTML = mockNotes.map(n => `
-                <div class="flex flex-col items-center space-y-1 flex-shrink-0 cursor-pointer relative" onclick="openChatView('u1', '${n.author}')">
-                    <div class="absolute -top-3 z-10 bg-red-500/90 text-white text-[9px] font-bold px-2 py-0.5 rounded-xl note-bubble max-w-[80px] truncate">
-                        ${n.note}
-                    </div>
-                    <div class="w-16 h-16 story-ring-active rounded-full flex items-center justify-center relative">
-                        <div class="w-full h-full bg-zinc-800 rounded-full flex items-center justify-center font-bold text-white text-sm">
-                            ${n.author.charAt(0)}
-                        </div>
-                        <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-black"></span>
-                    </div>
-                    <span class="text-[10px] text-zinc-300 font-medium">${n.author}</span>
-                </div>
-            `).join('');
-        }
-
-        // Inbox List
-        function renderInbox() {
-            const container = document.getElementById('inbox-list');
-            container.innerHTML = mockInbox.map(item => `
-                <div onclick="openChatView('${item.id}', '${item.name}')" class="p-2.5 rounded-2xl hover:bg-zinc-900 flex items-center justify-between cursor-pointer">
-                    <div class="flex items-center space-x-3 overflow-hidden">
-                        <div class="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-base text-white flex-shrink-0 relative">
-                            ${item.avatar}
-                            ${item.unread > 0 ? '<span class="absolute bottom-0 right-0 w-3 h-3 bg-blue-500 rounded-full border border-black"></span>' : ''}
-                        </div>
-                        <div class="truncate">
-                            <h4 class="font-bold text-xs text-white flex items-center space-x-1">
-                                <span class="truncate">${item.name}</span>
-                                ${item.pin ? '<i class="fa-solid fa-thumbtack text-[9px] text-zinc-500"></i>' : ''}
-                            </h4>
-                            <p class="text-[11px] ${item.unread > 0 ? 'text-white font-bold' : 'text-zinc-400'} truncate">${item.lastMsg}</p>
-                        </div>
-                    </div>
-                    <div class="text-right flex items-center space-x-2 flex-shrink-0 ml-2">
-                        <span class="text-[10px] text-zinc-500">${item.time}</span>
-                        ${item.unread > 0 ? `<span class="bg-blue-600 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">${item.unread}</span>` : ''}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Conversation Chat View
-        function openChatView(id, name) {
-            activeChatUser = { id, name };
-            document.getElementById('chat-conversation-view').classList.remove('hidden');
-            document.getElementById('active-chat-name').innerText = name;
-            document.getElementById('active-chat-avatar').innerText = name.charAt(0);
-            renderMessages();
-        }
-
-        function closeChatView() {
-            document.getElementById('chat-conversation-view').classList.add('hidden');
-        }
-
-        function renderMessages() {
-            const box = document.getElementById('chat-wallpaper-area');
-            const msgs = mockMessagesData['u1'] || [];
-
-            box.innerHTML = msgs.map(m => `
-                <div class="flex ${m.sender === 'me' ? 'justify-end' : 'justify-start'}">
-                    <div class="max-w-[80%] ${m.sender === 'me' ? 'bg-cyan-400 text-black rounded-2xl rounded-tr-none' : 'bg-zinc-900 text-white rounded-2xl rounded-tl-none'} p-3 shadow-md space-y-1 relative">
-                        ${m.replyTo ? `<div class="text-[10px] opacity-75 border-l-2 border-current pl-1.5 mb-1 italic">↵ ${m.replyTo}</div>` : ''}
-                        ${m.image ? `<img src="${m.image}" class="rounded-xl w-full max-h-52 object-cover">` : ''}
-                        ${m.text ? `<p class="text-xs font-medium whitespace-pre-line">${m.text}</p>` : ''}
-                        <div class="text-[9px] text-right opacity-60">1:57 PM</div>
-                    </div>
-                </div>
-            `).join('');
-
-            box.scrollTop = box.scrollHeight;
-        }
-
-        function sendDirectMessage() {
-            const input = document.getElementById('chat-text-input');
-            const text = input.value.trim();
-            if(!text) return;
-
-            if(!mockMessagesData['u1']) mockMessagesData['u1'] = [];
-            mockMessagesData['u1'].push({ id: Date.now(), text: text, sender: 'me' });
-
-            input.value = '';
-            renderMessages();
-        }
-
-        function simulateVoiceSend() {
-            if(!mockMessagesData['u1']) mockMessagesData['u1'] = [];
-            mockMessagesData['u1'].push({ id: Date.now(), text: '🎙️ Voice Message (0:15)', sender: 'me' });
-            renderMessages();
-        }
-
-        // Chat Info Screen
-        function openChatInfoPage() {
-            document.getElementById('chat-info-screen').classList.remove('hidden');
-            if(activeChatUser) {
-                document.getElementById('info-name').innerText = activeChatUser.name;
-                document.getElementById('info-avatar').innerText = activeChatUser.name.charAt(0);
-            }
-        }
-
-        function closeChatInfoPage() {
-            document.getElementById('chat-info-screen').classList.add('hidden');
-        }
-
-        // Post & Story Management
-        function openPostModal() { document.getElementById('modal-post').classList.remove('hidden'); }
-        function closePostModal() { document.getElementById('modal-post').classList.add('hidden'); }
-        function submitPost() {
-            const text = document.getElementById('post-text').value;
-            const priv = document.getElementById('post-privacy').value;
-            if(text) mockPosts.unshift({ id: Date.now(), author: 'You', text: text, privacy: priv, time: 'Just now' });
-            closePostModal();
-            renderPosts();
-        }
-
-        function openStoryModal() { document.getElementById('modal-story').classList.remove('hidden'); }
-        function closeStoryModal() { document.getElementById('modal-story').classList.add('hidden'); }
-        function submitStory() {
-            alert('Story published successfully!');
-            closeStoryModal();
-        }
-
-        function renderStories() {
-            const container = document.getElementById('feed-stories-carousel');
-            container.innerHTML = `
-                <div onclick="openStoryModal()" class="flex-shrink-0 w-16 h-24 bg-zinc-800 rounded-2xl border border-dashed border-zinc-700 flex flex-col items-center justify-center cursor-pointer">
-                    <span class="text-xl text-blue-500 font-bold">+</span>
-                    <span class="text-[9px] text-zinc-400 font-bold">Add</span>
-                </div>
-                <div class="flex-shrink-0 w-16 h-24 story-ring-active rounded-2xl overflow-hidden relative cursor-pointer">
-                    <div class="w-full h-full bg-gradient-to-b from-indigo-600 to-purple-800 p-1 flex items-end">
-                        <span class="text-[8px] font-bold text-white truncate">Bou Pakhi</span>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderPosts() {
-            const stream = document.getElementById('posts-stream');
-            stream.innerHTML = mockPosts.map(p => `
-                <div class="bg-zinc-900 p-3 rounded-2xl border border-zinc-800 space-y-2 text-xs">
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-white">${p.author}</span>
-                        <span class="text-[9px] bg-blue-950 text-blue-400 px-2 py-0.5 rounded font-mono">${p.privacy}</span>
-                    </div>
-                    <p class="text-zinc-300">${p.text}</p>
-                    <div class="flex justify-around pt-2 border-t border-zinc-800 text-zinc-500 text-xs">
-                        <button onclick="this.classList.toggle('text-blue-500')" class="flex items-center space-x-1"><i class="fa-regular fa-thumbs-up"></i> <span>Like</span></button>
-                        <button class="flex items-center space-x-1"><i class="fa-regular fa-comment"></i> <span>Comment</span></button>
-                    </div>
-                </div>
-            `).join('');
-        }
+        window.openPostModal = () => document.getElementById('modal-post').classList.remove('hidden');
+        window.closePostModal = () => document.getElementById('modal-post').classList.add('hidden');
+        window.openStoryModal = () => document.getElementById('modal-story').classList.remove('hidden');
+        window.closeStoryModal = () => document.getElementById('modal-story').classList.add('hidden');
     </script>
 </body>
 </html>
