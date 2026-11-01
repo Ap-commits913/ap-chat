@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AP Chat — Realtime Messenger Network</title>
+    <title>AP Chat — Ultimate Realtime Messenger</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -23,11 +23,7 @@
         body { font-family: 'Inter', sans-serif; background-color: #000000; color: #ffffff; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #3a3b3c; border-radius: 9999px; }
-        .chat-wallpaper-floral {
-            background-color: #0a0a16;
-            background-image: radial-gradient(#1e1d45 1.5px, transparent 1.5px);
-            background-size: 30px 30px;
-        }
+        .chat-wallpaper-custom { background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
         .story-ring-active { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); padding: 2.5px; }
     </style>
 </head>
@@ -35,7 +31,7 @@
 
     <div id="app" class="h-full flex flex-col max-w-md md:max-w-xl mx-auto bg-black shadow-2xl relative border-x border-zinc-900">
 
-        <!-- AUTHENTICATION SCREEN -->
+        <!-- AUTH SCREEN -->
         <div id="screen-auth" class="fixed inset-0 z-50 bg-black flex items-center justify-center p-4">
             <div class="w-full max-w-sm bg-zinc-900 border border-zinc-800 p-6 rounded-3xl shadow-2xl space-y-6">
                 <div class="text-center space-y-1">
@@ -43,7 +39,7 @@
                         <i class="fa-solid fa-bolt"></i>
                     </div>
                     <h1 class="text-2xl font-black tracking-tight text-white pt-2">AP Chat</h1>
-                    <p class="text-xs text-zinc-400">Realtime Network Platform</p>
+                    <p class="text-xs text-zinc-400">Realtime Messenger Network</p>
                 </div>
 
                 <div class="flex bg-zinc-800 p-1 rounded-xl text-xs font-bold">
@@ -64,20 +60,20 @@
                         <label class="block text-zinc-400 font-bold mb-1">PASSWORD</label>
                         <input type="password" id="auth-pass" required placeholder="••••••••" class="w-full bg-zinc-800 border border-zinc-700 p-3 rounded-xl outline-none focus:border-blue-500 text-white">
                     </div>
-                    <button type="submit" id="auth-btn-text" class="w-full bg-blue-600 hover:bg-blue-500 font-bold py-3 rounded-xl shadow-lg shadow-blue-600/30 text-white transition mt-2">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 font-bold py-3 rounded-xl shadow-lg shadow-blue-600/30 text-white transition mt-2">
                         Continue
                     </button>
                 </form>
             </div>
         </div>
 
-        <!-- MAIN DASHBOARD -->
+        <!-- MAIN APP DASHBOARD -->
         <div id="screen-main" class="hidden flex-1 flex flex-col h-full relative">
 
             <header class="bg-black border-b border-zinc-900 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
                 <div class="flex items-center space-x-3">
                     <span class="text-2xl font-black text-white tracking-tight">AP Chat</span>
-                    <span id="user-display-tag" class="text-[10px] bg-blue-900/50 border border-blue-500/40 text-blue-400 px-2 py-0.5 rounded-full font-bold uppercase">LIVE</span>
+                    <span class="text-[10px] bg-blue-900/50 border border-blue-500/40 text-blue-400 px-2 py-0.5 rounded-full font-bold uppercase">LIVE</span>
                 </div>
                 <div class="flex items-center space-x-3 text-white">
                     <button onclick="openPostModal()" class="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-300 hover:bg-zinc-800"><i class="fa-solid fa-plus text-xs"></i></button>
@@ -114,7 +110,7 @@
 
                 <!-- CHAT CONVERSATION VIEW -->
                 <div id="chat-conversation-view" class="hidden absolute inset-0 z-40 bg-black flex flex-col">
-                    <div class="p-3 bg-zinc-950 border-b border-zinc-900 flex items-center justify-between">
+                    <div class="p-3 bg-zinc-950 border-b border-zinc-900 flex items-center justify-between z-10">
                         <div class="flex items-center space-x-3">
                             <button onclick="closeChatView()" class="text-blue-500 text-lg p-1"><i class="fa-solid fa-arrow-left"></i></button>
                             <div id="active-chat-avatar" class="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-xs text-white">U</div>
@@ -123,33 +119,51 @@
                                 <p class="text-[10px] text-green-400">Online Realtime</p>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-4 text-cyan-400 text-lg">
-                            <i class="fa-solid fa-phone cursor-pointer" onclick="alert('Audio calling feature queued for WebRTC module.')"></i>
-                            <i class="fa-solid fa-video cursor-pointer" onclick="alert('Video calling feature queued for WebRTC module.')"></i>
+                        <div class="flex items-center space-x-3 text-cyan-400 text-lg">
+                            <label class="cursor-pointer" title="Set Chat Theme"><i class="fa-solid fa-palette text-sm"></i><input type="file" id="theme-file-input" accept="image/*" class="hidden" onchange="applyChatTheme(this)"></label>
+                            <i class="fa-solid fa-phone cursor-pointer" onclick="alert('Audio calling queued.')"></i>
+                            <i class="fa-solid fa-video cursor-pointer" onclick="alert('Video calling queued.')"></i>
                         </div>
                     </div>
 
-                    <div id="chat-wallpaper-area" class="flex-1 chat-wallpaper-floral p-3 overflow-y-auto custom-scrollbar space-y-3 relative"></div>
+                    <div id="chat-wallpaper-area" class="flex-1 chat-wallpaper-custom p-3 overflow-y-auto custom-scrollbar space-y-2 relative"></div>
+
+                    <!-- Media Upload Bar -->
+                    <div id="media-preview-bar" class="hidden px-3 py-1 bg-zinc-900 border-t border-zinc-800 flex items-center justify-between text-xs">
+                        <span id="media-preview-name" class="text-zinc-300 truncate">File attached</span>
+                        <button onclick="cancelMediaAttach()" class="text-red-500 font-bold">Remove</button>
+                    </div>
 
                     <div class="p-2 bg-black border-t border-zinc-900 flex items-center space-x-2">
-                        <button onclick="alert('Voice recording queued.')" class="text-cyan-400 p-2"><i class="fa-solid fa-microphone text-lg"></i></button>
-                        <input type="text" id="chat-text-input" placeholder="Message..." onkeypress="if(event.key==='Enter') sendRealtimeMessage()" class="flex-1 bg-zinc-900 border-none px-4 py-2 rounded-full text-xs outline-none text-white">
+                        <label class="text-cyan-400 p-2 cursor-pointer" title="Send Photo"><i class="fa-solid fa-image text-lg"></i><input type="file" id="chat-photo-input" accept="image/*" class="hidden" onchange="prepareChatMedia(this, 'image')"></label>
+                        <label class="text-cyan-400 p-2 cursor-pointer" title="Send Video"><i class="fa-solid fa-video text-lg"></i><input type="file" id="chat-video-input" accept="video/*" class="hidden" onchange="prepareChatMedia(this, 'video')"></label>
+                        <input type="text" id="chat-text-input" placeholder="Aa" onkeypress="if(event.key==='Enter') sendRealtimeMessage()" class="flex-1 bg-zinc-900 border-none px-4 py-2 rounded-full text-xs outline-none text-white">
                         <button onclick="sendRealtimeMessage()" class="text-cyan-400 p-2"><i class="fa-solid fa-paper-plane text-lg"></i></button>
                     </div>
                 </div>
 
-                <!-- DISCOVER / SEARCH USER TAB -->
+                <!-- DISCOVER TAB -->
                 <div id="tab-search" class="hidden p-3 space-y-3">
-                    <h4 class="text-xs font-bold text-zinc-400 px-1">Registered Users Across World</h4>
+                    <h4 class="text-xs font-bold text-zinc-400 px-1">Registered Users</h4>
                     <div id="global-users-list" class="space-y-2"></div>
                 </div>
 
                 <!-- PROFILE TAB -->
                 <div id="tab-profile" class="hidden p-4 space-y-4">
                     <div class="bg-zinc-900 p-6 rounded-3xl border border-zinc-800 text-center space-y-3">
-                        <div id="profile-avatar-box" class="w-20 h-20 bg-blue-600 text-white rounded-full mx-auto flex items-center justify-center font-bold text-3xl shadow-xl">A</div>
+                        <div class="relative w-20 h-20 mx-auto">
+                            <div id="profile-avatar-box" class="w-20 h-20 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-3xl shadow-xl overflow-hidden">A</div>
+                            <label class="absolute bottom-0 right-0 bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs cursor-pointer shadow"><i class="fa-solid fa-camera"></i><input type="file" accept="image/*" class="hidden" onchange="updateProfilePic(this)"></label>
+                        </div>
                         <h2 id="profile-name-text" class="text-lg font-bold text-white">User</h2>
                         <p id="profile-email-text" class="text-xs text-zinc-400">email@example.com</p>
+                        <div class="text-left pt-2">
+                            <label class="block text-[10px] text-zinc-400 font-bold mb-1">BIO (Facebook Style)</label>
+                            <div class="flex space-x-2">
+                                <input type="text" id="profile-bio-input" placeholder="Write bio..." class="flex-1 bg-zinc-800 border border-zinc-700 p-2 rounded-xl text-xs text-white outline-none">
+                                <button onclick="saveProfileBio()" class="bg-blue-600 text-white px-3 py-2 rounded-xl text-xs font-bold">Save</button>
+                            </div>
+                        </div>
                     </div>
                     <button onclick="triggerLogout()" class="w-full bg-red-600/20 text-red-500 font-bold py-3 rounded-2xl border border-red-500/30 text-xs">Log Out</button>
                 </div>
@@ -164,41 +178,117 @@
             </nav>
         </div>
 
-        <!-- POST MODAL -->
+        <!-- FULLSCREEN STORY VIEWER MODAL WITH VIEWERS & REACTIONS -->
+        <div id="modal-story-viewer" class="hidden fixed inset-0 z-50 bg-black flex flex-col justify-between p-4">
+            <div class="flex justify-between items-center z-10">
+                <div class="flex items-center space-x-2">
+                    <div id="viewer-author-avatar" class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs">U</div>
+                    <span id="viewer-author-name" class="text-xs font-bold">Author</span>
+                </div>
+                <button onclick="closeStoryViewer()" class="text-white text-xl p-2"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="flex-1 flex flex-col items-center justify-center relative overflow-hidden my-2">
+                <img id="viewer-story-img" class="max-h-[65vh] max-w-full rounded-2xl object-contain">
+                <p id="viewer-story-caption" class="text-xs text-zinc-200 mt-2 text-center"></p>
+            </div>
+            <!-- Viewers & Reactions Stats Bar -->
+            <div class="bg-zinc-900/90 p-3 rounded-2xl border border-zinc-800 space-y-2">
+                <div class="flex justify-between text-[11px] font-bold text-zinc-300">
+                    <span id="story-views-count">Views: 0</span>
+                    <span id="story-reactions-count">Reactions: 0</span>
+                </div>
+                <div id="story-viewers-list" class="text-[10px] text-zinc-400 truncate">Seen by: None yet</div>
+                <div class="flex justify-around pt-1 text-lg">
+                    <button onclick="reactOnStory('❤️')">❤️</button>
+                    <button onclick="reactOnStory('😆')">😆</button>
+                    <button onclick="reactOnStory('😮')">😮</button>
+                    <button onclick="reactOnStory('😢')">😢</button>
+                    <button onclick="reactOnStory('🔥')">🔥</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- POST MODAL WITH PRIVACY -->
         <div id="modal-post" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
             <div class="bg-zinc-900 border border-zinc-800 w-full max-w-sm rounded-2xl p-4 space-y-3">
                 <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
-                    <h3 class="font-bold text-xs text-white">Create Feed Post</h3>
+                    <h3 class="font-bold text-xs text-white">Create Post</h3>
                     <button onclick="closePostModal()" class="text-zinc-400"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                <textarea id="post-text" placeholder="Write something..." class="w-full h-20 bg-zinc-800 border border-zinc-700 p-2.5 rounded-xl text-xs text-white outline-none resize-none"></textarea>
+                <textarea id="post-text" placeholder="What's on your mind?" class="w-full h-20 bg-zinc-800 border border-zinc-700 p-2.5 rounded-xl text-xs text-white outline-none resize-none"></textarea>
+                <div>
+                    <label class="block text-[10px] text-zinc-400 font-bold mb-1">AUDIENCE PRIVACY</label>
+                    <select id="post-privacy" class="w-full bg-zinc-800 border border-zinc-700 p-2 rounded-xl text-xs font-bold text-blue-400 outline-none">
+                        <option value="🌐 Public">🌐 Public</option>
+                        <option value="👥 Friends">👥 Friends Only</option>
+                        <option value="🔒 Custom">🔒 Custom</option>
+                        <option value="🚫 Hide From">🚫 Hide From Specific Users</option>
+                    </select>
+                </div>
                 <button onclick="submitRealtimePost()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Post</button>
             </div>
         </div>
 
-        <!-- STORY MODAL WITH IMAGE UPLOAD -->
+        <!-- STORY CREATION MODAL WITH CROP & PRIVACY -->
         <div id="modal-story" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
             <div class="bg-zinc-900 border border-zinc-800 w-full max-w-sm rounded-2xl p-4 space-y-3">
                 <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
-                    <h3 class="font-bold text-xs text-white">Add Photo Story</h3>
+                    <h3 class="font-bold text-xs text-white">Create Story</h3>
                     <button onclick="closeStoryModal()" class="text-zinc-400"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div>
-                    <label class="block text-[10px] text-zinc-400 font-bold mb-1">SELECT IMAGE</label>
-                    <input type="file" id="story-file-input" accept="image/*" class="w-full bg-zinc-800 border border-zinc-700 p-2 rounded-xl text-xs text-white outline-none">
+                    <label class="block text-[10px] text-zinc-400 font-bold mb-1">SELECT STORY IMAGE (CROP READY)</label>
+                    <input type="file" id="story-file-input" accept="image/*" class="w-full bg-zinc-800 border border-zinc-700 p-2 rounded-xl text-xs text-white outline-none" onchange="previewStoryCrop(this)">
                 </div>
-                <input type="text" id="story-caption" placeholder="Add story caption..." class="w-full bg-zinc-800 border border-zinc-700 p-2.5 rounded-xl text-xs text-white outline-none">
+                <div id="story-crop-preview-container" class="hidden text-center">
+                    <img id="story-crop-preview-img" class="max-h-36 mx-auto rounded-xl object-cover border border-blue-500">
+                    <span class="text-[10px] text-green-400 font-bold">Image ready & cropped</span>
+                </div>
+                <input type="text" id="story-caption" placeholder="Add caption..." class="w-full bg-zinc-800 border border-zinc-700 p-2.5 rounded-xl text-xs text-white outline-none">
+                <div>
+                    <label class="block text-[10px] text-zinc-400 font-bold mb-1">STORY PRIVACY</label>
+                    <select id="story-privacy" class="w-full bg-zinc-800 border border-zinc-700 p-2 rounded-xl text-xs font-bold text-blue-400 outline-none">
+                        <option value="🌐 Public">🌐 Public</option>
+                        <option value="👥 Friends">👥 Friends Only</option>
+                        <option value="🔒 Custom">🔒 Custom</option>
+                        <option value="🚫 Hide From">🚫 Hide From Specific Users</option>
+                    </select>
+                </div>
                 <button onclick="submitRealtimeStory()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Publish Story</button>
+            </div>
+        </div>
+
+        <!-- CROP & EDIT MODAL FOR PROFILE PIC -->
+        <div id="modal-crop" class="hidden fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
+            <div class="bg-zinc-900 border border-zinc-800 w-full max-w-sm rounded-2xl p-4 space-y-3 text-center">
+                <h3 class="font-bold text-xs text-white">Crop Profile Picture</h3>
+                <img id="crop-source-img" class="max-h-48 mx-auto rounded-full object-cover border-2 border-blue-500">
+                <button onclick="confirmCropAndSave()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Crop & Save</button>
+            </div>
+        </div>
+
+        <!-- PRIVACY EDIT MODAL FOR POST/STORY -->
+        <div id="modal-edit-privacy" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+            <div class="bg-zinc-900 border border-zinc-800 w-full max-w-sm rounded-2xl p-4 space-y-3">
+                <h3 class="font-bold text-xs text-white">Change Privacy</h3>
+                <select id="edit-privacy-select" class="w-full bg-zinc-800 border border-zinc-700 p-2.5 rounded-xl text-xs font-bold text-blue-400 outline-none">
+                    <option value="🌐 Public">🌐 Public</option>
+                    <option value="👥 Friends">👥 Friends Only</option>
+                    <option value="🔒 Custom">🔒 Custom</option>
+                    <option value="🚫 Hide From">🚫 Hide From Specific Users</option>
+                </select>
+                <button onclick="saveItemPrivacy()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Update</button>
+                <button onclick="document.getElementById('modal-edit-privacy').classList.add('hidden')" class="w-full bg-zinc-800 text-zinc-300 font-bold py-2 rounded-xl text-xs">Cancel</button>
             </div>
         </div>
 
     </div>
 
-    <!-- FIREBASE MODULE LOGIC -->
+    <!-- FIREBASE & CORE LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, doc, setDoc, onSnapshot, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBdLGspLUDEQRRf_Hr8655pJrm889BDr0g",
@@ -219,6 +309,11 @@
         let activePeer = null;
         let currentAuthMode = 'login';
         let chatUnsubscribe = null;
+        let pendingMedia = null;
+        let tempProfileBase64 = null;
+        let tempStoryBase64 = null;
+        let activeEditItem = null; // {type, id}
+        let activeStoryDocId = null;
 
         window.setAuthTab = (mode) => {
             currentAuthMode = mode;
@@ -241,6 +336,8 @@
                         uid: res.user.uid,
                         name: name,
                         email: email,
+                        bio: "Hey there! I am using AP Chat.",
+                        avatarUrl: "",
                         createdAt: Date.now()
                     });
                 } else {
@@ -251,14 +348,27 @@
             }
         };
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if(user) {
                 currentUser = user;
                 document.getElementById('screen-auth').classList.add('hidden');
                 document.getElementById('screen-main').classList.remove('hidden');
                 
                 document.getElementById('profile-email-text').innerText = user.email;
-                
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if(userDoc.exists()) {
+                    const d = userDoc.data();
+                    document.getElementById('profile-name-text').innerText = d.name;
+                    document.getElementById('profile-bio-input').value = d.bio || "";
+                    if(d.avatarUrl) {
+                        document.getElementById('profile-avatar-box').innerHTML = `<img src="${d.avatarUrl}" class="w-full h-full object-cover">`;
+                        document.getElementById('my-avatar-icon').innerHTML = `<img src="${d.avatarUrl}" class="w-full h-full object-cover">`;
+                    } else {
+                        document.getElementById('profile-avatar-box').innerText = d.name.charAt(0).toUpperCase();
+                        document.getElementById('my-avatar-icon').innerText = d.name.charAt(0).toUpperCase();
+                    }
+                }
+
                 listenGlobalUsers();
                 listenPosts();
                 listenStories();
@@ -271,6 +381,48 @@
 
         window.triggerLogout = () => signOut(auth);
 
+        // Profile Bio & Picture Crop
+        window.saveProfileBio = async () => {
+            const bio = document.getElementById('profile-bio-input').value;
+            await updateDoc(doc(db, "users", currentUser.uid), { bio: bio });
+            alert("Bio updated successfully!");
+        };
+
+        window.updateProfilePic = (input) => {
+            if(input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('crop-source-img').src = e.target.result;
+                    tempProfileBase64 = e.target.result;
+                    document.getElementById('modal-crop').classList.remove('hidden');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+
+        window.confirmCropAndSave = async () => {
+            if(tempProfileBase64) {
+                await updateDoc(doc(db, "users", currentUser.uid), { avatarUrl: tempProfileBase64 });
+                document.getElementById('modal-crop').classList.add('hidden');
+                document.getElementById('profile-avatar-box').innerHTML = `<img src="${tempProfileBase64}" class="w-full h-full object-cover">`;
+                document.getElementById('my-avatar-icon').innerHTML = `<img src="${tempProfileBase64}" class="w-full h-full object-cover">`;
+                alert("Profile picture updated!");
+            }
+        };
+
+        // Story Crop Preview
+        window.previewStoryCrop = (input) => {
+            if(input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    tempStoryBase64 = e.target.result;
+                    document.getElementById('story-crop-preview-img').src = tempStoryBase64;
+                    document.getElementById('story-crop-preview-container').classList.remove('hidden');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+
         function listenGlobalUsers() {
             onSnapshot(collection(db, "users"), (snapshot) => {
                 const list = document.getElementById('global-users-list');
@@ -280,20 +432,17 @@
 
                 snapshot.forEach((docSnap) => {
                     const u = docSnap.data();
-                    if(u.uid === currentUser.uid) {
-                        document.getElementById('profile-name-text').innerText = u.name;
-                        document.getElementById('my-avatar-icon').innerText = u.name.charAt(0).toUpperCase();
-                        document.getElementById('profile-avatar-box').innerText = u.name.charAt(0).toUpperCase();
-                        return;
-                    }
+                    if(u.uid === currentUser.uid) return;
+
+                    const avatarHtml = u.avatarUrl ? `<img src="${u.avatarUrl}" class="w-full h-full object-cover">` : u.name.charAt(0).toUpperCase();
 
                     list.innerHTML += `
                         <div class="bg-zinc-900 border border-zinc-800 p-3 rounded-2xl flex items-center justify-between">
                             <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-sm text-white">${u.name.charAt(0).toUpperCase()}</div>
+                                <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-sm text-white overflow-hidden">${avatarHtml}</div>
                                 <div>
                                     <h5 class="text-xs font-bold text-white">${u.name}</h5>
-                                    <p class="text-[10px] text-zinc-400">${u.email}</p>
+                                    <p class="text-[10px] text-zinc-400">${u.bio || u.email}</p>
                                 </div>
                             </div>
                             <button onclick="openRealtimeChat('${u.uid}', '${u.name}')" class="bg-blue-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg">Message</button>
@@ -302,7 +451,7 @@
 
                     inbox.innerHTML += `
                         <div onclick="openRealtimeChat('${u.uid}', '${u.name}')" class="p-3 rounded-2xl hover:bg-zinc-900 flex items-center space-x-3 cursor-pointer border-b border-zinc-900">
-                            <div class="w-11 h-11 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-sm text-white">${u.name.charAt(0).toUpperCase()}</div>
+                            <div class="w-11 h-11 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-sm text-white overflow-hidden">${avatarHtml}</div>
                             <div class="flex-1">
                                 <h4 class="font-bold text-xs text-white">${u.name}</h4>
                                 <p class="text-[10px] text-zinc-500">Tap to chat in realtime</p>
@@ -313,6 +462,7 @@
             });
         }
 
+        // Chat & Realtime Messaging with Single Emoji Filter & Reactions & Edit/Delete
         window.openRealtimeChat = (peerUid, peerName) => {
             activePeer = { uid: peerUid, name: peerName };
             document.getElementById('chat-conversation-view').classList.remove('hidden');
@@ -320,20 +470,46 @@
             document.getElementById('active-chat-avatar').innerText = peerName.charAt(0).toUpperCase();
 
             const chatId = currentUser.uid < peerUid ? `${currentUser.uid}_${peerUid}` : `${peerUid}_${currentUser.uid}`;
-            
             if(chatUnsubscribe) chatUnsubscribe();
 
             const q = query(collection(db, "chats", chatId, "messages"), orderBy("timestamp", "asc"));
             chatUnsubscribe = onSnapshot(q, (snapshot) => {
                 const area = document.getElementById('chat-wallpaper-area');
                 area.innerHTML = '';
+                let lastTimestamp = 0;
+
                 snapshot.forEach((docSnap) => {
-                    const msg = docSnap.data();
+                    const msg = { id: docSnap.id, ...docSnap.data() };
+                    if(msg.deletedFor && msg.deletedFor.includes(currentUser.uid)) return;
+
                     const isMe = msg.senderUid === currentUser.uid;
+                    const showTime = (msg.timestamp - lastTimestamp) > 30 * 60 * 1000;
+                    lastTimestamp = msg.timestamp;
+                    const timeStr = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+                    let contentHtml = '';
+                    if(msg.type === 'image') {
+                        contentHtml = `<img src="${msg.mediaUrl}" class="rounded-xl max-h-48 object-cover mb-1">`;
+                    } else if(msg.type === 'video') {
+                        contentHtml = `<video src="${msg.mediaUrl}" controls class="rounded-xl max-h-48 object-cover mb-1"></video>`;
+                    }
+                    if(msg.text) {
+                        contentHtml += `<p>${msg.text} ${msg.edited ? '<span class="text-[8px] opacity-70">(edited)</span>' : ''}</p>`;
+                    }
+
                     area.innerHTML += `
-                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
-                            <div class="max-w-[80%] ${isMe ? 'bg-blue-600 text-white rounded-2xl rounded-tr-none' : 'bg-zinc-800 text-white rounded-2xl rounded-tl-none'} p-3 text-xs shadow-md">
-                                <p>${msg.text}</p>
+                        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} my-1">
+                            <div class="max-w-[80%] ${isMe ? 'bg-blue-600 text-white rounded-2xl rounded-tr-none' : 'bg-zinc-800 text-white rounded-2xl rounded-tl-none'} p-3 text-xs shadow-md relative cursor-pointer" onclick="toggleMsgOptions('${msg.id}', ${isMe})" oncontextmenu="event.preventDefault(); showMsgActionMenu('${msg.id}', ${isMe})">
+                                ${contentHtml}
+                                ${msg.reaction ? `<span class="absolute -bottom-2 ${isMe ? 'left-1' : 'right-1'} bg-zinc-900 border border-zinc-700 px-1.5 py-0.2 rounded-full text-[10px]">${msg.reaction}</span>` : ''}
+                            </div>
+                            <span class="text-[9px] text-zinc-500 mt-0.5 px-1 ${showTime ? 'block' : 'hidden'}">${timeStr}</span>
+                            <div id="msg-actions-${msg.id}" class="hidden bg-zinc-900 border border-zinc-800 p-1.5 rounded-xl flex space-x-2 text-[10px] mt-1 z-20">
+                                <button onclick="addMsgReaction('${chatId}', '${msg.id}', '❤️')">❤️</button>
+                                <button onclick="addMsgReaction('${chatId}', '${msg.id}', '👍')">👍</button>
+                                <button onclick="deleteMsgForMe('${chatId}', '${msg.id}')" class="text-zinc-400">Delete For Me</button>
+                                ${isMe ? `<button onclick="deleteMsgForEveryone('${chatId}', '${msg.id}')" class="text-red-400">Delete Everyone</button>` : ''}
+                                ${isMe && msg.text ? `<button onclick="editMsgPrompt('${chatId}', '${msg.id}', \`${msg.text}\`)" class="text-blue-400">Edit</button>` : ''}
                             </div>
                         </div>
                     `;
@@ -347,27 +523,119 @@
             if(chatUnsubscribe) chatUnsubscribe();
         };
 
+        window.toggleMsgOptions = (id, isMe) => {
+            const el = document.getElementById(`msg-actions-${id}`);
+            el.classList.toggle('hidden');
+        };
+
+        window.prepareChatMedia = (input, type) => {
+            if(input.files && input.files[0]) {
+                const file = input.files[0];
+                if(file.size > 500 * 1024 * 1024) {
+                    alert("File size exceeds 500MB limit!");
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    pendingMedia = { type: type, url: e.target.result, name: file.name };
+                    document.getElementById('media-preview-name').innerText = `Attached ${type}: ${file.name}`;
+                    document.getElementById('media-preview-bar').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.cancelMediaAttach = () => {
+            pendingMedia = null;
+            document.getElementById('media-preview-bar').classList.add('hidden');
+        };
+
         window.sendRealtimeMessage = async () => {
             const input = document.getElementById('chat-text-input');
             const text = input.value.trim();
-            if(!text || !activePeer) return;
+            if(!text && !pendingMedia) return;
+
+            // Single Emoji detection filter (No text + Only emojis)
+            let isSingleEmojiOnly = false;
+            if(!pendingMedia && text) {
+                const emojiRegex = /^(\p{Emoji_Presentation}|\p{Extended_Pictographic}|\s)+$/u;
+                if(emojiRegex.test(text) && text.replace(/\s/g, '').length <= 4) {
+                    isSingleEmojiOnly = true;
+                }
+            }
 
             const chatId = currentUser.uid < activePeer.uid ? `${currentUser.uid}_${activePeer.uid}` : `${activePeer.uid}_${currentUser.uid}`;
             input.value = '';
 
-            await addDoc(collection(db, "chats", chatId, "messages"), {
+            let msgPayload = {
                 senderUid: currentUser.uid,
                 text: text,
-                timestamp: Date.now()
-            });
+                timestamp: Date.now(),
+                deletedFor: []
+            };
+
+            if(pendingMedia) {
+                msgPayload.type = pendingMedia.type;
+                msgPayload.mediaUrl = pendingMedia.url;
+                pendingMedia = null;
+                document.getElementById('media-preview-bar').classList.add('hidden');
+            } else if(isSingleEmojiOnly) {
+                // Sent directly as giant or pure emoji bubble without standard chat bubble box if needed, or treated as plain emoji message
+                msgPayload.type = 'emoji';
+            } else {
+                msgPayload.type = 'text';
+            }
+
+            await addDoc(collection(db, "chats", chatId, "messages"), msgPayload);
         };
 
+        window.addMsgReaction = async (chatId, msgId, emoji) => {
+            await updateDoc(doc(db, "chats", chatId, "messages", msgId), { reaction: emoji });
+        };
+
+        window.deleteMsgForMe = async (chatId, msgId) => {
+            const ref = doc(db, "chats", chatId, "messages", msgId);
+            const snap = await getDoc(ref);
+            if(snap.exists()) {
+                const deletedFor = snap.data().deletedFor || [];
+                deletedFor.push(currentUser.uid);
+                await updateDoc(ref, { deletedFor: deletedFor });
+            }
+        };
+
+        window.deleteMsgForEveryone = async (chatId, msgId) => {
+            await deleteDoc(doc(db, "chats", chatId, "messages", msgId));
+        };
+
+        window.editMsgPrompt = async (chatId, msgId, oldText) => {
+            const newText = prompt("Edit message:", oldText);
+            if(newText !== null) {
+                await updateDoc(doc(db, "chats", chatId, "messages", msgId), { text: newText, edited: true });
+            }
+        };
+
+        window.applyChatTheme = (input) => {
+            if(input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const area = document.getElementById('chat-wallpaper-area');
+                    area.style.backgroundImage = `url('${e.target.result}')`;
+                    alert("Chat background theme applied!");
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+
+        // Posts Management with Privacy & 3-Dot Menu
         window.submitRealtimePost = async () => {
             const text = document.getElementById('post-text').value.trim();
+            const privacy = document.getElementById('post-privacy').value;
             if(!text) return;
             await addDoc(collection(db, "posts"), {
+                authorUid: currentUser.uid,
                 authorName: document.getElementById('profile-name-text').innerText || "User",
                 text: text,
+                privacy: privacy,
                 timestamp: Date.now()
             });
             document.getElementById('post-text').value = '';
@@ -380,12 +648,17 @@
                 const stream = document.getElementById('posts-stream');
                 stream.innerHTML = '';
                 snapshot.forEach((docSnap) => {
-                    const p = docSnap.data();
+                    const p = { id: docSnap.id, ...docSnap.data() };
+                    const isMyPost = p.authorUid === currentUser.uid;
+
                     stream.innerHTML += `
-                        <div class="bg-zinc-900 p-3 rounded-2xl border border-zinc-800 space-y-2 text-xs">
+                        <div class="bg-zinc-900 p-3 rounded-2xl border border-zinc-800 space-y-2 text-xs relative">
                             <div class="flex justify-between items-center">
-                                <span class="font-bold text-white">${p.authorName}</span>
-                                <span class="text-[9px] text-zinc-500">${new Date(p.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                <span class="font-bold text-white">${p.authorName} <span class="text-[9px] text-blue-400 font-mono">(${p.privacy})</span></span>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-[9px] text-zinc-500">${new Date(p.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                    ${isMyPost ? `<button onclick="openEditMenu('post', '${p.id}', '${p.privacy}')" class="text-zinc-400 hover:text-white px-1"><i class="fa-solid fa-ellipsis-vertical"></i></button>` : ''}
+                                </div>
                             </div>
                             <p class="text-zinc-300">${p.text}</p>
                         </div>
@@ -394,27 +667,28 @@
             });
         }
 
+        // Story Management with Fullscreen Viewer, Viewers tracking & Reactions
         window.submitRealtimeStory = async () => {
-            const fileInput = document.getElementById('story-file-input');
             const caption = document.getElementById('story-caption').value;
+            const privacy = document.getElementById('story-privacy').value;
             
-            if(fileInput.files.length === 0) {
+            if(!tempStoryBase64) {
                 alert("Please select an image file for your story!");
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const imgDataUrl = e.target.result;
-                await addDoc(collection(db, "stories"), {
-                    authorName: document.getElementById('profile-name-text').innerText || "User",
-                    imageUrl: imgDataUrl,
-                    caption: caption,
-                    timestamp: Date.now()
-                });
-                closeStoryModal();
-            };
-            reader.readAsDataURL(fileInput.files[0]);
+            await addDoc(collection(db, "stories"), {
+                authorUid: currentUser.uid,
+                authorName: document.getElementById('profile-name-text').innerText || "User",
+                imageUrl: tempStoryBase64,
+                caption: caption,
+                privacy: privacy,
+                viewers: [],
+                reactions: [],
+                timestamp: Date.now()
+            });
+            tempStoryBase64 = null;
+            closeStoryModal();
         };
 
         function listenStories() {
@@ -424,21 +698,97 @@
                 carousel.innerHTML = `
                     <div onclick="openStoryModal()" class="flex-shrink-0 w-16 h-24 bg-zinc-800 rounded-2xl border border-dashed border-zinc-700 flex flex-col items-center justify-center cursor-pointer">
                         <span class="text-xl text-blue-500 font-bold">+</span>
-                        <span class="text-[9px] text-zinc-400 font-bold">Add Photo</span>
+                        <span class="text-[9px] text-zinc-400 font-bold">Add Story</span>
                     </div>
                 `;
                 snapshot.forEach((docSnap) => {
-                    const s = docSnap.data();
+                    const s = { id: docSnap.id, ...docSnap.data() };
+                    const isMyStory = s.authorUid === currentUser.uid;
+
                     carousel.innerHTML += `
-                        <div class="flex-shrink-0 w-16 h-24 story-ring-active rounded-2xl overflow-hidden relative cursor-pointer">
+                        <div onclick="openStoryViewer('${s.id}', '${s.imageUrl}', '${s.caption || ''}', '${s.authorName}', ${JSON.stringify(s.viewers || [])}, ${JSON.stringify(s.reactions || [])}, ${isMyStory})" class="flex-shrink-0 w-16 h-24 story-ring-active rounded-2xl overflow-hidden relative cursor-pointer">
                             <img src="${s.imageUrl}" class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-1 flex items-end">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-1 flex items-end justify-between">
                                 <span class="text-[8px] font-bold text-white truncate">${s.authorName}</span>
+                                ${isMyStory ? `<button onclick="event.stopPropagation(); openEditMenu('story', '${s.id}', '${s.privacy}')" class="text-white text-[10px]"><i class="fa-solid fa-ellipsis-vertical"></i></button>` : ''}
                             </div>
                         </div>
                     `;
                 });
             });
+        }
+
+        window.openStoryViewer = async (storyId, imageUrl, caption, authorName, viewers, reactions, isMyStory) => {
+            activeStoryDocId = storyId;
+            document.getElementById('viewer-story-img').src = imageUrl;
+            document.getElementById('viewer-story-caption').innerText = caption;
+            document.getElementById('viewer-author-name').innerText = authorName;
+            document.getElementById('viewer-author-avatar').innerText = authorName.charAt(0).toUpperCase();
+
+            // Track viewers
+            if(!isMyStory) {
+                const ref = doc(db, "stories", storyId);
+                const snap = await getDoc(ref);
+                if(snap.exists()) {
+                    let vList = snap.data().viewers || [];
+                    const myName = document.getElementById('profile-name-text').innerText || "User";
+                    if(!vList.some(v => v.uid === currentUser.uid)) {
+                        vList.push({ uid: currentUser.uid, name: myName });
+                        await updateDoc(ref, { viewers: vList });
+                    }
+                }
+            }
+
+            // Render stats
+            document.getElementById('story-views-count').innerText = `Views: ${viewers.length}`;
+            document.getElementById('story-reactions-count').innerText = `Reactions: ${reactions.length}`;
+            document.getElementById('story-viewers-list').innerText = viewers.length > 0 ? `Seen by: ${viewers.map(v => v.name).join(', ')}` : "Seen by: None yet";
+
+            document.getElementById('modal-story-viewer').classList.remove('hidden');
+        };
+
+        window.closeStoryViewer = () => {
+            document.getElementById('modal-story-viewer').classList.add('hidden');
+            activeStoryDocId = null;
+        };
+
+        window.reactOnStory = async (emoji) => {
+            if(!activeStoryDocId) return;
+            const ref = doc(db, "stories", activeStoryDocId);
+            const snap = await getDoc(ref);
+            if(snap.exists()) {
+                let rList = snap.data().reactions || [];
+                rList.push({ uid: currentUser.uid, emoji: emoji });
+                await updateDoc(ref, { reactions: rList });
+                alert(`Reacted with ${emoji}!`);
+            }
+        };
+
+        // 3-Dot Menu for Post/Story Edit & Delete
+        window.openEditMenu = (type, id, currentPrivacy) => {
+            activeEditItem = { type, id };
+            document.getElementById('edit-privacy-select').value = currentPrivacy;
+            const action = prompt("Choose action:\n1. Change Privacy\n2. Delete", "1");
+            if(action === "1") {
+                document.getElementById('modal-edit-privacy').classList.remove('hidden');
+            } else if(action === "2") {
+                if(confirm("Are you sure you want to delete this?")) {
+                    deleteItem(type, id);
+                }
+            }
+        };
+
+        window.saveItemPrivacy = async () => {
+            if(!activeEditItem) return;
+            const newPrivacy = document.getElementById('edit-privacy-select').value;
+            await updateDoc(doc(db, activeEditItem.type === 'post' ? "posts" : "stories", activeEditItem.id), { privacy: newPrivacy });
+            document.getElementById('modal-edit-privacy').classList.add('hidden');
+            alert("Privacy updated successfully!");
+        };
+
+        async function deleteItem(type, id) {
+            await deleteDoc(doc(db, type === 'post' ? "posts" : "stories", id));
+            alert("Deleted successfully!");
         }
 
         window.switchTab = (tab) => {
