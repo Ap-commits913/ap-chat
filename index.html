@@ -144,7 +144,6 @@
                         <label class="text-cyan-400 p-2 cursor-pointer" title="Send Video"><i class="fa-solid fa-video text-lg"></i><input type="file" id="chat-video-input" accept="video/*" class="hidden" onchange="prepareChatMedia(this, 'video')"></label>
                         <input type="text" id="chat-text-input" placeholder="Aa" onkeypress="if(event.key==='Enter') sendRealtimeMessage()" class="flex-1 bg-zinc-900 border-none px-4 py-2 rounded-full text-xs outline-none text-white">
                         
-                        <!-- Quick Reaction Button -->
                         <button id="quick-emoji-btn" onclick="sendQuickEmoji()" oncontextmenu="openQuickEmojiPicker(event)" class="text-xl px-1.5 py-1 text-cyan-400" title="Click to send, Right-click/Hold to change">👍</button>
                         
                         <button onclick="sendRealtimeMessage()" class="text-cyan-400 p-2"><i class="fa-solid fa-paper-plane text-lg"></i></button>
@@ -241,7 +240,7 @@
                         <option value="🚫 Hide From">🚫 Hide From Specific Users</option>
                     </select>
                 </div>
-                <button onclick="submitRealtimePost()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Post</button>
+                <button onclick="submitRealtimePost()" id="post-submit-btn" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Post</button>
             </div>
         </div>
 
@@ -267,7 +266,7 @@
                         <option value="🚫 Hide From">🚫 Hide From Specific Users</option>
                     </select>
                 </div>
-                <button onclick="submitRealtimeStory()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Publish Story</button>
+                <button onclick="submitRealtimeStory()" id="story-submit-btn" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Publish Story</button>
             </div>
         </div>
 
@@ -314,6 +313,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBdLGspLUDEQRRf_Hr8655pJrm889BDr0g",
@@ -329,15 +329,16 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
 
         let currentUser = null;
         let activePeer = null;
         let currentAuthMode = 'login';
         let chatUnsubscribe = null;
-        let pendingMedia = null;
-        let tempProfileBase64 = null;
-        let tempStoryData = null;
-        let tempPostFiles = [];
+        let pendingMediaFile = null;
+        let tempProfileFile = null;
+        let tempStoryFile = null;
+        let tempPostFilesList = [];
         let activeEditItem = null;
         let activeStoryDocId = null;
         let activeMessageIdForReaction = null;
@@ -422,33 +423,38 @@
 
         window.updateProfilePic = (input) => {
             if(input.files && input.files[0]) {
+                tempProfileFile = input.files[0];
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     document.getElementById('crop-source-img').src = e.target.result;
-                    tempProfileBase64 = e.target.result;
                     document.getElementById('modal-crop').classList.remove('hidden');
                 };
-                reader.readAsDataURL(input.files[0]);
+                reader.readAsDataURL(tempProfileFile);
             }
         };
 
         window.confirmCropAndSave = async () => {
-            if(tempProfileBase64) {
-                await updateDoc(doc(db, "users", currentUser.uid), { avatarUrl: tempProfileBase64 });
+            if(tempProfileFile) {
+                const sRef = storageRef(storage, `profiles/${currentUser.uid}_${Date.now()}`);
+                await uploadBytes(sRef, tempProfileFile);
+                const downloadUrl = await getDownloadURL(sRef);
+
+                await updateDoc(doc(db, "users", currentUser.uid), { avatarUrl: downloadUrl });
                 document.getElementById('modal-crop').classList.add('hidden');
-                document.getElementById('profile-avatar-box').innerHTML = `<img src="${tempProfileBase64}" class="w-full h-full object-cover">`;
-                document.getElementById('my-avatar-icon').innerHTML = `<img src="${tempProfileBase64}" class="w-full h-full object-cover">`;
+                document.getElementById('profile-avatar-box').innerHTML = `<img src="${downloadUrl}" class="w-full h-full object-cover">`;
+                document.getElementById('my-avatar-icon').innerHTML = `<img src="${downloadUrl}" class="w-full h-full object-cover">`;
+                tempProfileFile = null;
                 alert("Profile picture updated!");
             }
         };
 
         window.previewStoryMedia = (input) => {
             if(input.files && input.files[0]) {
-                const file = input.files[0];
+                tempStoryFile = input.files[0];
+                const file = tempStoryFile;
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const type = file.type.startsWith('video') ? 'video' : 'image';
-                    tempStoryData = { type: type, url: e.target.result };
                     const container = document.getElementById('story-preview-container');
                     container.classList.remove('hidden');
                     if(type === 'video') {
@@ -462,15 +468,15 @@
         };
 
         window.previewPostFiles = (input) => {
-            tempPostFiles = [];
+            tempPostFilesList = [];
             const container = document.getElementById('post-media-preview');
             container.innerHTML = '';
             if(input.files) {
-                Array.from(input.files).forEach(file => {
+                tempPostFilesList = Array.from(input.files);
+                tempPostFilesList.forEach(file => {
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         const type = file.type.startsWith('video') ? 'video' : 'image';
-                        tempPostFiles.push({ type: type, url: e.target.result });
                         if(type === 'video') {
                             container.innerHTML += `<video src="${e.target.result}" class="h-20 w-full object-cover rounded-lg"></video>`;
                         } else {
@@ -545,7 +551,6 @@
                     lastTimestamp = msg.timestamp;
                     const timeStr = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-                    // Update delivered/seen status if received by peer
                     if(!isMe && msg.status !== 'seen') {
                         updateDoc(doc(db, "chats", chatId, "messages", msg.id), { status: 'seen' });
                     }
@@ -559,11 +564,9 @@
                         contentHtml = `<video src="${msg.mediaUrl}" controls class="rounded-xl max-h-48 object-cover mb-1"></video>`;
                     } else if(msg.text) {
                         const trimmed = msg.text.trim();
-                        // Check if string consists purely of emojis
                         const emojiRegex = /^(\p{Extended_Pictographic}|\p{Emoji_Component}|\s)+$/u;
                         if(emojiRegex.test(trimmed)) {
                             isOnlyEmojis = true;
-                            // Count emojis approximately by code points or array length
                             const emojiArray = Array.from(trimmed.replace(/\s+/g, ''));
                             const count = emojiArray.length;
                             let emojiClass = 'emoji-1';
@@ -608,46 +611,46 @@
 
         window.prepareChatMedia = (input, type) => {
             if(input.files && input.files[0]) {
-                const file = input.files[0];
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    pendingMedia = { type: type, url: e.target.result, name: file.name };
-                    document.getElementById('media-preview-name').innerText = `Attached ${type}: ${file.name}`;
-                    document.getElementById('media-preview-bar').classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
+                pendingMediaFile = input.files[0];
+                document.getElementById('media-preview-name').innerText = `Attached ${type}: ${pendingMediaFile.name}`;
+                document.getElementById('media-preview-bar').classList.remove('hidden');
             }
         };
 
         window.cancelMediaAttach = () => {
-            pendingMedia = null;
+            pendingMediaFile = null;
             document.getElementById('media-preview-bar').classList.add('hidden');
         };
 
         window.sendRealtimeMessage = async () => {
             const input = document.getElementById('chat-text-input');
             const text = input.value.trim();
-            if(!text && !pendingMedia) return;
+            if(!text && !pendingMediaFile) return;
 
             const chatId = currentUser.uid < activePeer.uid ? `${currentUser.uid}_${activePeer.uid}` : `${activePeer.uid}_${currentUser.uid}`;
             input.value = '';
 
+            let mediaUrl = "";
+            let mediaType = "text";
+
+            if(pendingMediaFile) {
+                mediaType = pendingMediaFile.type.startsWith('video') ? 'video' : 'image';
+                const sRef = storageRef(storage, `chats/${chatId}/${Date.now()}_${pendingMediaFile.name}`);
+                await uploadBytes(sRef, pendingMediaFile);
+                mediaUrl = await getDownloadURL(sRef);
+                pendingMediaFile = null;
+                document.getElementById('media-preview-bar').classList.add('hidden');
+            }
+
             let msgPayload = {
                 senderUid: currentUser.uid,
                 text: text,
+                type: mediaUrl ? mediaType : 'text',
+                mediaUrl: mediaUrl,
                 timestamp: Date.now(),
                 status: 'delivered',
                 deletedFor: []
             };
-
-            if(pendingMedia) {
-                msgPayload.type = pendingMedia.type;
-                msgPayload.mediaUrl = pendingMedia.url;
-                pendingMedia = null;
-                document.getElementById('media-preview-bar').classList.add('hidden');
-            } else {
-                msgPayload.type = 'text';
-            }
 
             await addDoc(collection(db, "chats", chatId, "messages"), msgPayload);
         };
@@ -693,34 +696,48 @@
             }
         };
 
-        window.applyChatTheme = (input) => {
+        window.applyChatTheme = async (input) => {
             if(input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const area = document.getElementById('chat-wallpaper-area');
-                    area.style.backgroundImage = `url('${e.target.result}')`;
-                    alert("Chat background theme applied!");
-                };
-                reader.readAsDataURL(input.files[0]);
+                const file = input.files[0];
+                const sRef = storageRef(storage, `themes/${currentUser.uid}_${Date.now()}`);
+                await uploadBytes(sRef, file);
+                const url = await getDownloadURL(sRef);
+                const area = document.getElementById('chat-wallpaper-area');
+                area.style.backgroundImage = `url('${url}')`;
+                alert("Chat background theme applied!");
             }
         };
 
         window.submitRealtimePost = async () => {
             const text = document.getElementById('post-text').value.trim();
             const privacy = document.getElementById('post-privacy').value;
-            if(!text && tempPostFiles.length === 0) return;
+            if(!text && tempPostFilesList.length === 0) return;
+
+            const postBtn = document.getElementById('post-submit-btn');
+            postBtn.innerText = "Uploading...";
+
+            let uploadedMedia = [];
+            for(let file of tempPostFilesList) {
+                const type = file.type.startsWith('video') ? 'video' : 'image';
+                const sRef = storageRef(storage, `posts/${currentUser.uid}_${Date.now()}_${file.name}`);
+                await uploadBytes(sRef, file);
+                const url = await getDownloadURL(sRef);
+                uploadedMedia.push({ type: type, url: url });
+            }
 
             await addDoc(collection(db, "posts"), {
                 authorUid: currentUser.uid,
                 authorName: document.getElementById('profile-name-text').innerText || "User",
                 text: text,
-                mediaFiles: tempPostFiles,
+                mediaFiles: uploadedMedia,
                 privacy: privacy,
                 timestamp: Date.now()
             });
+
             document.getElementById('post-text').value = '';
-            tempPostFiles = [];
+            tempPostFilesList = [];
             document.getElementById('post-media-preview').innerHTML = '';
+            postBtn.innerText = "Post";
             closePostModal();
         };
 
@@ -767,22 +784,32 @@
             const caption = document.getElementById('story-caption').value;
             const privacy = document.getElementById('story-privacy').value;
             
-            if(!tempStoryData) {
+            if(!tempStoryFile) {
                 alert("Please select a photo or video for your story!");
                 return;
             }
 
+            const storyBtn = document.getElementById('story-submit-btn');
+            storyBtn.innerText = "Publishing...";
+
+            const type = tempStoryFile.type.startsWith('video') ? 'video' : 'image';
+            const sRef = storageRef(storage, `stories/${currentUser.uid}_${Date.now()}_${tempStoryFile.name}`);
+            await uploadBytes(sRef, tempStoryFile);
+            const url = await getDownloadURL(sRef);
+
             await addDoc(collection(db, "stories"), {
                 authorUid: currentUser.uid,
                 authorName: document.getElementById('profile-name-text').innerText || "User",
-                media: tempStoryData,
+                media: { type: type, url: url },
                 caption: caption,
                 privacy: privacy,
                 viewers: [],
                 reactions: [],
                 timestamp: Date.now()
             });
-            tempStoryData = null;
+
+            tempStoryFile = null;
+            storyBtn.innerText = "Publish Story";
             closeStoryModal();
         };
 
