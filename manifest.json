@@ -4,9 +4,9 @@
   "display": "standalone",
   "name": "AP CHAT",
   "orientation": "any",
-  "scope": "/",
+  "scope": "/ap-chat/",
   "short_name": "AP chat",
-  "start_url": "/",
+  "start_url": "/ap-chat/",
   "theme_color": "#ffffff",
   "id": "com.apchat.app",
   "description": "A fast and simple web chat application.",
@@ -32,4 +32,3 @@
     }
   ]
 }
-
