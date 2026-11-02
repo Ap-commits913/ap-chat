@@ -1,10 +1,19 @@
 {
-  "name": "AP CHAT",
-  "short_name": "AP Chat",
-  "start_url": "/ap-chat/",
-  "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "AP CHAT",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "AP chat",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "id": "com.apchat.app",
+  "description": "A fast and simple web chat application.",
+  "lang": "en",
+  "categories": [
+    "social networking"
+  ],
   "icons": [
     {
       "src": "launchericon-192x192.png",
