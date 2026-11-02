@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ap-chat-v2';
+const CACHE_NAME = 'ap-chat-v3';
 const urlsToCache = [
   './',
   './index.html',
@@ -12,10 +12,9 @@ const urlsToCache = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        return cache.addAll(urlsToCache);
-      })
+      .then((cache) => cache.addAll(urlsToCache))
   );
+  self.skipWaiting();
 });
 
 // Activate & Clean Old Caches
@@ -31,14 +30,22 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
+  self.clients.claim();
 });
 
-// Fetch Assets
+// Fetch Assets with GitHub Pages Subdirectory Fallback
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        return response || fetch(event.request);
-      })
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(event.request).catch(() => {
+        // Fallback to index.html for SPA routing if offline/error
+        if (event.request.mode === 'navigate') {
+          return caches.match('./index.html');
+        }
+      });
+    })
   );
 });
