@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AP Chat — Ultimate Realtime Messenger</title>
-    <!-- এখানে ম্যানিফেস্ট লিংকটি যুক্ত করা হয়েছে -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     
@@ -29,6 +28,11 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #3a3b3c; border-radius: 9999px; }
         .chat-wallpaper-custom { background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
         .story-ring-active { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); padding: 2.5px; }
+        .emoji-1 { font-size: 3rem; line-height: 1; }
+        .emoji-2 { font-size: 2.2rem; line-height: 1; }
+        .emoji-3 { font-size: 1.8rem; line-height: 1; }
+        .emoji-4 { font-size: 1.5rem; line-height: 1; }
+        .emoji-5 { font-size: 1.2rem; line-height: 1; }
     </style>
 </head>
 <body class="h-full select-none overflow-hidden bg-black text-white">
@@ -135,10 +139,14 @@
                         <button onclick="cancelMediaAttach()" class="text-red-500 font-bold">Remove</button>
                     </div>
 
-                    <div class="p-2 bg-black border-t border-zinc-900 flex items-center space-x-2">
+                    <div class="p-2 bg-black border-t border-zinc-900 flex items-center space-x-2 relative">
                         <label class="text-cyan-400 p-2 cursor-pointer" title="Send Photo"><i class="fa-solid fa-image text-lg"></i><input type="file" id="chat-photo-input" accept="image/*" class="hidden" onchange="prepareChatMedia(this, 'image')"></label>
                         <label class="text-cyan-400 p-2 cursor-pointer" title="Send Video"><i class="fa-solid fa-video text-lg"></i><input type="file" id="chat-video-input" accept="video/*" class="hidden" onchange="prepareChatMedia(this, 'video')"></label>
                         <input type="text" id="chat-text-input" placeholder="Aa" onkeypress="if(event.key==='Enter') sendRealtimeMessage()" class="flex-1 bg-zinc-900 border-none px-4 py-2 rounded-full text-xs outline-none text-white">
+                        
+                        <!-- Quick Reaction Button -->
+                        <button id="quick-emoji-btn" onclick="sendQuickEmoji()" oncontextmenu="openQuickEmojiPicker(event)" class="text-xl px-1.5 py-1 text-cyan-400" title="Click to send, Right-click/Hold to change">👍</button>
+                        
                         <button onclick="sendRealtimeMessage()" class="text-cyan-400 p-2"><i class="fa-solid fa-paper-plane text-lg"></i></button>
                     </div>
                 </div>
@@ -287,6 +295,18 @@
             </div>
         </div>
 
+        <!-- MESSAGE REACTION PICKER MODAL -->
+        <div id="modal-msg-reactions" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center" onclick="closeMsgReactionPicker()">
+            <div class="bg-zinc-900 border border-zinc-800 p-3 rounded-full flex space-x-3 text-2xl shadow-2xl" onclick="event.stopPropagation()">
+                <button onclick="reactOnMessage('❤️')">❤️</button>
+                <button onclick="reactOnMessage('😆')">😆</button>
+                <button onclick="reactOnMessage('😮')">😮</button>
+                <button onclick="reactOnMessage('😢')">😢</button>
+                <button onclick="reactOnMessage('🔥')">🔥</button>
+                <button onclick="reactOnMessage('👍')">👍</button>
+            </div>
+        </div>
+
     </div>
 
     <!-- FIREBASE MODULE SCRIPT -->
@@ -320,6 +340,8 @@
         let tempPostFiles = [];
         let activeEditItem = null;
         let activeStoryDocId = null;
+        let activeMessageIdForReaction = null;
+        let quickEmojiSymbol = '👍';
 
         window.setAuthTab = (mode) => {
             currentAuthMode = mode;
@@ -523,23 +545,55 @@
                     lastTimestamp = msg.timestamp;
                     const timeStr = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
+                    // Update delivered/seen status if received by peer
+                    if(!isMe && msg.status !== 'seen') {
+                        updateDoc(doc(db, "chats", chatId, "messages", msg.id), { status: 'seen' });
+                    }
+
                     let contentHtml = '';
+                    let isOnlyEmojis = false;
+
                     if(msg.type === 'image') {
                         contentHtml = `<img src="${msg.mediaUrl}" class="rounded-xl max-h-48 object-cover mb-1">`;
                     } else if(msg.type === 'video') {
                         contentHtml = `<video src="${msg.mediaUrl}" controls class="rounded-xl max-h-48 object-cover mb-1"></video>`;
-                    }
-                    if(msg.text) {
-                        contentHtml += `<p>${msg.text}</p>`;
+                    } else if(msg.text) {
+                        const trimmed = msg.text.trim();
+                        // Check if string consists purely of emojis
+                        const emojiRegex = /^(\p{Extended_Pictographic}|\p{Emoji_Component}|\s)+$/u;
+                        if(emojiRegex.test(trimmed)) {
+                            isOnlyEmojis = true;
+                            // Count emojis approximately by code points or array length
+                            const emojiArray = Array.from(trimmed.replace(/\s+/g, ''));
+                            const count = emojiArray.length;
+                            let emojiClass = 'emoji-1';
+                            if(count === 2) emojiClass = 'emoji-2';
+                            else if(count === 3) emojiClass = 'emoji-3';
+                            else if(count === 4) emojiClass = 'emoji-4';
+                            else if(count >= 5) emojiClass = 'emoji-5';
+
+                            contentHtml = `<div class="${emojiClass}">${trimmed}</div>`;
+                        } else {
+                            contentHtml = `<p>${msg.text}</p>`;
+                        }
                     }
 
+                    let statusIcon = '<i class="fa-solid fa-check text-[9px] text-zinc-400"></i>';
+                    if(msg.status === 'delivered') statusIcon = '<i class="fa-solid fa-check-double text-[9px] text-zinc-400"></i>';
+                    else if(msg.status === 'seen') statusIcon = '<i class="fa-solid fa-check-double text-[9px] text-blue-400"></i>';
+
+                    const bubbleStyle = isOnlyEmojis ? 'bg-transparent shadow-none p-0' : `${isMe ? 'bg-blue-600 text-white rounded-2xl rounded-tr-none' : 'bg-zinc-800 text-white rounded-2xl rounded-tl-none'} p-3 text-xs shadow-md`;
+
                     area.innerHTML += `
-                        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} my-1">
-                            <div class="max-w-[80%] ${isMe ? 'bg-blue-600 text-white rounded-2xl rounded-tr-none' : 'bg-zinc-800 text-white rounded-2xl rounded-tl-none'} p-3 text-xs shadow-md relative">
+                        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} my-1 group" oncontextmenu="openMsgReactionModal(event, '${msg.id}')" onclick="openMsgReactionModal(event, '${msg.id}')">
+                            <div class="max-w-[80%] ${bubbleStyle} relative cursor-pointer">
                                 ${contentHtml}
                                 ${msg.reaction ? `<span class="absolute -bottom-2 ${isMe ? 'left-1' : 'right-1'} bg-zinc-900 border border-zinc-700 px-1.5 py-0.2 rounded-full text-[10px]">${msg.reaction}</span>` : ''}
                             </div>
-                            <span class="text-[9px] text-zinc-500 mt-0.5 px-1 ${showTime ? 'block' : 'hidden'}">${timeStr}</span>
+                            <div class="flex items-center space-x-1 mt-0.5 px-1 ${showTime ? 'flex' : 'hidden'}">
+                                <span class="text-[9px] text-zinc-500">${timeStr}</span>
+                                ${isMe ? statusIcon : ''}
+                            </div>
                         </div>
                     `;
                 });
@@ -582,6 +636,7 @@
                 senderUid: currentUser.uid,
                 text: text,
                 timestamp: Date.now(),
+                status: 'delivered',
                 deletedFor: []
             };
 
@@ -595,6 +650,47 @@
             }
 
             await addDoc(collection(db, "chats", chatId, "messages"), msgPayload);
+        };
+
+        window.openMsgReactionModal = (e, msgId) => {
+            e.preventDefault();
+            activeMessageIdForReaction = msgId;
+            document.getElementById('modal-msg-reactions').classList.remove('hidden');
+        };
+
+        window.closeMsgReactionPicker = () => {
+            document.getElementById('modal-msg-reactions').classList.add('hidden');
+            activeMessageIdForReaction = null;
+        };
+
+        window.reactOnMessage = async (emoji) => {
+            if(!activeMessageIdForReaction || !activePeer) return;
+            const chatId = currentUser.uid < activePeer.uid ? `${currentUser.uid}_${activePeer.uid}` : `${activePeer.uid}_${currentUser.uid}`;
+            const ref = doc(db, "chats", chatId, "messages", activeMessageIdForReaction);
+            await updateDoc(ref, { reaction: emoji });
+            closeMsgReactionPicker();
+        };
+
+        window.sendQuickEmoji = async () => {
+            if(!activePeer) return;
+            const chatId = currentUser.uid < activePeer.uid ? `${currentUser.uid}_${activePeer.uid}` : `${activePeer.uid}_${currentUser.uid}`;
+            await addDoc(collection(db, "chats", chatId, "messages"), {
+                senderUid: currentUser.uid,
+                text: quickEmojiSymbol,
+                type: 'text',
+                timestamp: Date.now(),
+                status: 'delivered',
+                deletedFor: []
+            });
+        };
+
+        window.openQuickEmojiPicker = (e) => {
+            e.preventDefault();
+            const newEmoji = prompt("Enter quick emoji symbol:", quickEmojiSymbol);
+            if(newEmoji) {
+                quickEmojiSymbol = newEmoji.trim();
+                document.getElementById('quick-emoji-btn').innerText = quickEmojiSymbol;
+            }
         };
 
         window.applyChatTheme = (input) => {
@@ -745,13 +841,16 @@
             }
 
             const statsOwner = document.getElementById('viewer-stats-owner');
+            const reactionsOtherArea = document.getElementById('viewer-reactions-other');
             if(isMyStory) {
                 statsOwner.classList.remove('hidden');
+                reactionsOtherArea.classList.add('hidden');
                 document.getElementById('story-views-count').innerText = `Views: ${viewers.length}`;
                 document.getElementById('story-reactions-count').innerText = `Reactions: ${reactions.length}`;
                 document.getElementById('story-viewers-list').innerText = viewers.length > 0 ? `Seen by: ${viewers.map(v => v.name).join(', ')}` : "Seen by: None yet";
             } else {
                 statsOwner.classList.add('hidden');
+                reactionsOtherArea.classList.remove('hidden');
             }
 
             document.getElementById('modal-story-viewer').classList.remove('hidden');
