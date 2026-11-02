@@ -436,8 +436,8 @@
         window.confirmCropAndSave = async () => {
             if(tempProfileFile) {
                 const sRef = storageRef(storage, `profiles/${currentUser.uid}_${Date.now()}`);
-                await uploadBytes(sRef, tempProfileFile);
-                const downloadUrl = await getDownloadURL(sRef);
+                const uploadTask = await uploadBytes(sRef, tempProfileFile);
+                const downloadUrl = await getDownloadURL(uploadTask.ref);
 
                 await updateDoc(doc(db, "users", currentUser.uid), { avatarUrl: downloadUrl });
                 document.getElementById('modal-crop').classList.add('hidden');
@@ -636,8 +636,8 @@
             if(pendingMediaFile) {
                 mediaType = pendingMediaFile.type.startsWith('video') ? 'video' : 'image';
                 const sRef = storageRef(storage, `chats/${chatId}/${Date.now()}_${pendingMediaFile.name}`);
-                await uploadBytes(sRef, pendingMediaFile);
-                mediaUrl = await getDownloadURL(sRef);
+                const uploadTask = await uploadBytes(sRef, pendingMediaFile);
+                mediaUrl = await getDownloadURL(uploadTask.ref);
                 pendingMediaFile = null;
                 document.getElementById('media-preview-bar').classList.add('hidden');
             }
@@ -700,8 +700,8 @@
             if(input.files && input.files[0]) {
                 const file = input.files[0];
                 const sRef = storageRef(storage, `themes/${currentUser.uid}_${Date.now()}`);
-                await uploadBytes(sRef, file);
-                const url = await getDownloadURL(sRef);
+                const uploadTask = await uploadBytes(sRef, file);
+                const url = await getDownloadURL(uploadTask.ref);
                 const area = document.getElementById('chat-wallpaper-area');
                 area.style.backgroundImage = `url('${url}')`;
                 alert("Chat background theme applied!");
@@ -720,8 +720,8 @@
             for(let file of tempPostFilesList) {
                 const type = file.type.startsWith('video') ? 'video' : 'image';
                 const sRef = storageRef(storage, `posts/${currentUser.uid}_${Date.now()}_${file.name}`);
-                await uploadBytes(sRef, file);
-                const url = await getDownloadURL(sRef);
+                const uploadTask = await uploadBytes(sRef, file);
+                const url = await getDownloadURL(uploadTask.ref);
                 uploadedMedia.push({ type: type, url: url });
             }
 
@@ -794,8 +794,8 @@
 
             const type = tempStoryFile.type.startsWith('video') ? 'video' : 'image';
             const sRef = storageRef(storage, `stories/${currentUser.uid}_${Date.now()}_${tempStoryFile.name}`);
-            await uploadBytes(sRef, tempStoryFile);
-            const url = await getDownloadURL(sRef);
+            const uploadTask = await uploadBytes(sRef, tempStoryFile);
+            const url = await getDownloadURL(uploadTask.ref);
 
             await addDoc(collection(db, "stories"), {
                 authorUid: currentUser.uid,
