@@ -1,23 +1,20 @@
-const CACHE_NAME = 'ap-chat-v3';
+const CACHE_NAME = 'ap-chat-v4';
 const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './launchericon-192x192.png',
-  './launchericon-144x144.png',
-  './launchericon-96x96.png'
+  '/ap-chat/',
+  '/ap-chat/index.html',
+  '/ap-chat/manifest.json',
+  '/ap-chat/launchericon-192x192.png',
+  '/ap-chat/launchericon-144x144.png',
+  '/ap-chat/launchericon-96x96.png'
 ];
 
-// Install Service Worker
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
   );
   self.skipWaiting();
 });
 
-// Activate & Clean Old Caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -33,7 +30,6 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch Assets with GitHub Pages Subdirectory Fallback
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
@@ -41,9 +37,8 @@ self.addEventListener('fetch', (event) => {
         return cachedResponse;
       }
       return fetch(event.request).catch(() => {
-        // Fallback to index.html for SPA routing if offline/error
         if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
+          return caches.match('/ap-chat/index.html');
         }
       });
     })
